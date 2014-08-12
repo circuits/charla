@@ -1,0 +1,3 @@
+redis==2.10.1
+redisco==0.1.4
+-e hg+https://bitbucket.org/circuits/circuits#egg=circuits
