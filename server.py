@@ -5,14 +5,18 @@
 
 
 from sys import stderr
+from itertools import chain
+from operator import attrgetter
 from collections import defaultdict
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 
+# from attrdict import AttrDict
+
 from circuits import handler, Component, Debugger
 
-from circuits.net.events import write
 from circuits.net.sockets import TCPServer
+from circuits.net.events import close, write
 
 from circuits.protocols.irc import joinprefix, reply, response, IRC, Message
 
@@ -56,6 +60,41 @@ def parse_args():
     return parser.parse_args()
 
 
+class Channel(object):
+
+    def __init__(self, name):
+        self.name = name
+
+        self.users = []
+
+
+class User(object):
+
+    def __init__(self, sock, host, port):
+        self.sock = sock
+        self.host = host
+        self.port = port
+
+        self.nick = None
+        self.away = False
+        self.channels = []
+        self.registered = False
+        self.userinfo = UserInfo()
+
+    @property
+    def prefix(self):
+        userinfo = self.userinfo
+        return joinprefix(self.nick, userinfo.user, userinfo.host)
+
+
+class UserInfo(object):
+
+    def __init__(self, user=None, host=None, name=None):
+        self.user = user
+        self.host = host
+        self.name = name
+
+
 class Server(Component):
 
     channel = "server"
@@ -70,7 +109,7 @@ class Server(Component):
         self.buffers = defaultdict(bytes)
 
         self.nicks = {}
-        self.clients = {}
+        self.users = {}
         self.channels = {}
 
         if args.debug:
@@ -95,15 +134,21 @@ class Server(Component):
             updateBuffer=self.buffers.__setitem__
         ).register(self)
 
+    def _notify(self, users, message, exclude=None):
+        for user in users:
+            if exclude is not None and user is exclude:
+                continue
+            self.fire(reply(user.sock, message))
+
     def read(self, sock, data):
-        client = self.clients[sock]
-        host, port = client["host"], client["port"]
+        user = self.users[sock]
+        host, port = user.host, user.port
 
         stderr.write("[{0:s}:{1:d}] -> {2:s}\n".format(host, port, repr(data)))
 
     def write(self, sock, data):
-        client = self.clients[sock]
-        host, port = client["host"], client["port"]
+        user = self.users[sock]
+        host, port = user.host, user.port
 
         stderr.write("[{0:s}:{1:d}] <- {2:s}\n".format(host, port, repr(data)))
 
@@ -115,44 +160,57 @@ class Server(Component):
         )
 
     def connect(self, sock, host, port):
-        self.clients[sock] = {
-            "sock": sock,
-            "host": host,
-            "port": port,
-            "nick": None,
-            "away": False,
-            "userinfo": {},
-            "registered": False
-        }
+        self.users[sock] = User(sock, host, port)
 
     def disconnect(self, sock):
-        if sock not in self.clients:
+        if sock not in self.users:
             return
 
-        client = self.clients[sock]
+        user = self.users[sock]
 
-        del self.clients[sock]
-        del self.nicks[client["nick"]]
+        nick = user.nick
+        user, host = user.userinfo.user, user.userinfo.host
+
+        yield self.call(
+            response.create("quit", sock, (nick, user, host), "Leavling")
+        )
+
+        del self.users[sock]
+        del self.nicks[nick]
+
+    def quit(self, sock, source, reason="Leaving"):
+        user = self.users[sock]
+
+        channels = [self.channels[channel] for channel in user.channels]
+        for channel in channels:
+            channel.users.remove(user)
+            if not channel.users:
+                del self.channels[channel.name]
+
+        users = chain(*map(attrgetter("users"), channels))
+
+        self.fire(close(sock))
+
+        self._notify(
+            users,
+            Message("QUIT", reason, prefix=user.prefix), user
+        )
 
     def nick(self, sock, source, nick):
-        client = self.clients[sock]
+        user = self.users[sock]
 
         if nick in self.nicks:
             return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)))
 
-        client["nick"] = nick
-        self.nicks[nick] = client
+        user.nick = nick
+        self.nicks[nick] = user
 
     def user(self, sock, source, nick, user, host, name):
-        client = self.clients[sock]
+        _user = self.users[sock]
 
-        client["userinfo"] = {
-            "user": user,
-            "host": host,
-            "name": name
-        }
+        _user.userinfo = UserInfo(user, host, name)
 
-        client["registered"] = True
+        _user.registered = True
 
         self.fire(reply(sock, RPL_WELCOME(self.network)))
         self.fire(reply(sock, RPL_YOURHOST(self.host, self.version)))
@@ -161,98 +219,67 @@ class Server(Component):
         # Force users to join #circuits
         self.fire(response.create("join", sock, source, "#circuits"))
 
-    def join(self, sock, source, channel):
-        client = self.clients[sock]
+    def join(self, sock, source, name):
+        user = self.users[sock]
 
-        if channel not in self.channels:
-            channeldata = self.channels[channel] = {
-                "name": channel,
-                "users": []
-            }
+        if name not in self.channels:
+            channel = self.channels[name] = Channel(name)
         else:
-            channeldata = self.channels[channel]
+            channel = self.channels[name]
 
-        if client in channeldata["users"]:
+        if user in channel.users:
             return
 
-        channeldata["users"].append(client)
+        user.channels.append(name)
+        channel.users.append(user)
 
-        nick = client["nick"]
-        userinfo = client["userinfo"]
-        user, host = userinfo["user"], userinfo["host"]
+        self._notify(
+            channel.users,
+            Message("JOIN", name, prefix=user.prefix)
+        )
 
-        prefix = joinprefix(nick, user, host)
-
-        for user in channeldata["users"]:
-            self.fire(
-                reply(
-                    user["sock"],
-                    Message("JOIN", channel, prefix=prefix)
-                )
-            )
-
-        self.fire(reply(sock, RPL_NOTOPIC(channel)))
-        self.fire(reply(sock, RPL_NAMEREPLY(channeldata)))
+        self.fire(reply(sock, RPL_NOTOPIC(name)))
+        self.fire(reply(sock, RPL_NAMEREPLY(channel)))
         self.fire(reply(sock, RPL_ENDOFNAMES()))
 
-    def part(self, sock, source, channel, reason="Leaving"):
-        client = self.clients[sock]
+    def part(self, sock, source, name, reason="Leaving"):
+        user = self.users[sock]
 
-        channeldata = self.channels[channel]
+        channel = self.channels[name]
 
-        nick = client["nick"]
-        userinfo = client["userinfo"]
-        user, host = userinfo["user"], userinfo["host"]
+        self._notify(
+            channel.users,
+            Message("PART", name, reason, prefix=user.prefix)
+        )
 
-        prefix = joinprefix(nick, user, host)
+        user.channels.remove(name)
+        channel.users.remove(user)
 
-        for user in channeldata["users"]:
-            self.fire(
-                reply(
-                    user["sock"],
-                    Message("PART", channel, reason, prefix=prefix)
-                )
-            )
-
-        channeldata["users"].remove(client)
-
-        if not channeldata["users"]:
-            del self.channels[channel]
+        if not channel.users:
+            del self.channels[name]
 
     def privmsg(self, sock, source, target, message):
-        client = self.clients[sock]
-
-        nick = client["nick"]
-        userinfo = client["userinfo"]
-        user, host = userinfo["user"], userinfo["host"]
-
-        prefix = joinprefix(nick, user, host)
+        user = self.users[sock]
 
         if target.startswith("#"):
             if target not in self.channels:
                 return self.fire(reply(sock, ERR_NOSUCHCHANNEL(target)))
 
-            channeldata = self.channels[target]
-            for user in channeldata["users"]:
-                if user is client:
-                    continue
+            channel = self.channels[target]
 
-                self.fire(
-                    reply(
-                        user["sock"],
-                        Message("PRIVMSG", target, message, prefix=prefix)
-                    )
-                )
+            self._notify(
+                channel.users,
+                Message("PRIVMSG", target, message, prefix=user.prefix),
+                user
+            )
         else:
             if target not in self.nicks:
                 return self.fire(reply(sock, ERR_NOSUCHNICK(target)))
 
-            user = self.nicks[target]
-
             self.fire(
                 reply(
-                    user["sock"],
-                    Message("PRIVMSG", target, message, prefix=prefix)
+                    self.nicks[target].sock,
+                    Message("PRIVMSG", target, message, prefix=user.prefix)
                 )
             )
 
@@ -261,9 +288,9 @@ class Server(Component):
             if mask not in self.channels:
                 return self.fire(reply(sock, ERR_NOSUCHCHANNEL(mask)))
 
-            channeldata = self.channels[mask]
+            channel = self.channels[mask]
 
-            for user in channeldata["users"]:
+            for user in channel.users:
                 self.fire(reply(sock, RPL_WHOREPLY(user, mask, self.host)))
             self.fire(reply(sock, RPL_ENDOFWHO(mask)))
         else:
@@ -280,10 +307,10 @@ class Server(Component):
         self.fire(reply(sock, Message("PONG", server)))
 
     def reply(self, target, message):
-        client = self.clients[target]
+        user = self.users[target]
 
         if message.add_nick:
-            message.args.insert(0, client.get("nick", None) or "")
+            message.args.insert(0, user.nick or "")
 
         if message.prefix is None:
             message.prefix = self.host
@@ -297,6 +324,9 @@ class Server(Component):
 
     @handler()
     def _on_event(self, event, *args, **kwargs):
+        if event.name.endswith("_done"):
+            return
+
         if isinstance(event, response):
             if event.name not in self.commands:
                 event.stop()
