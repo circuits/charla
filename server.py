@@ -20,6 +20,7 @@ from circuits.protocols.irc.replies import (
     ERR_NOMOTD, ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, ERR_UNKNOWNCOMMAND,
     RPL_WELCOME, RPL_YOURHOST, RPL_WHOREPLY, RPL_ENDOFWHO, RPL_NOTOPIC,
     RPL_NAMEREPLY, RPL_ENDOFNAMES,
+    ERR_NICKNAMEINUSE,
 )
 
 
@@ -135,6 +136,10 @@ class Server(Component):
 
     def nick(self, sock, source, nick):
         client = self.clients[sock]
+
+        if nick in self.nicks:
+            return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)))
+
         client["nick"] = nick
         self.nicks[nick] = client
 
@@ -272,7 +277,7 @@ class Server(Component):
         client = self.clients[target]
 
         if message.add_nick:
-            message.args.insert(0, client["nick"])
+            message.args.insert(0, client.get("nick", None) or "")
 
         if message.prefix is None:
             message.prefix = self.host
