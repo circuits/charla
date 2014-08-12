@@ -1,0 +1,4 @@
+charla:
+    build: .
+    ports:
+      - "6667:6667"
