@@ -172,6 +172,9 @@ class Server(Component):
         else:
             channeldata = self.channels[channel]
 
+        if client in channeldata["users"]:
+            return
+
         channeldata["users"].append(client)
 
         nick = client["nick"]
