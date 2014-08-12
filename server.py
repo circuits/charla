@@ -11,8 +11,6 @@ from collections import defaultdict
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 
-# from attrdict import AttrDict
-
 from circuits import handler, Component, Debugger
 
 from circuits.net.sockets import TCPServer
