@@ -1,3 +1,7 @@
+.. _Python: http://python.org/
+.. _circuits: http://circuitsframework.org/
+
+
 charla
 ======
 
