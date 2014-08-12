@@ -158,6 +158,9 @@ class Server(Component):
         self.fire(reply(sock, RPL_YOURHOST(self.host, self.version)))
         self.fire(reply(sock, ERR_NOMOTD()))
 
+        # Force users to join #circuits
+        self.fire(response.create("join", sock, source, "#circuits"))
+
     def join(self, sock, source, channel):
         client = self.clients[sock]
 
