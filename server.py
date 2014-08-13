@@ -104,9 +104,9 @@ class Server(Component):
     host = "localhost"
     version = "ircd v{0:s}".format(__version__)
 
-    def init(self, args, log=None):
+    def init(self, args, logger=None):
         self.args = args
-        self.log = log or getLogger(__name__)
+        self.logger = logger or getLogger(__name__)
 
         self.buffers = defaultdict(bytes)
 
@@ -146,13 +146,17 @@ class Server(Component):
         user = self.users[sock]
         host, port = user.host, user.port
 
-        self.log.info("I: [{0:s}:{1:d}] {2:s}".format(host, port, repr(data)))
+        self.logger.info(
+            "I: [{0:s}:{1:d}] {2:s}".format(host, port, repr(data))
+        )
 
     def write(self, sock, data):
         user = self.users[sock]
         host, port = user.host, user.port
 
-        self.log.info("O: [{0:s}:{1:d}] {2:s}".format(host, port, repr(data)))
+        self.logger.info(
+            "O: [{0:s}:{1:d}] {2:s}".format(host, port, repr(data))
+        )
 
     def ready(self, server, bind):
         stderr.write(
@@ -164,7 +168,7 @@ class Server(Component):
     def connect(self, sock, host, port):
         self.users[sock] = User(sock, host, port)
 
-        self.log.info("C: [{0:s}:{1:d}]".format(host, port))
+        self.logger.info("C: [{0:s}:{1:d}]".format(host, port))
 
     def disconnect(self, sock):
         if sock not in self.users:
@@ -172,7 +176,7 @@ class Server(Component):
 
         user = self.users[sock]
 
-        self.log.info("D: [{0:s}:{1:d}]".format(user.host, user.port))
+        self.logger.info("D: [{0:s}:{1:d}]".format(user.host, user.port))
 
         nick = user.nick
         user, host = user.userinfo.user, user.userinfo.host
@@ -350,7 +354,7 @@ def main():
 
     logger = getLogger(__name__)
 
-    Server(args, log=logger).run()
+    Server(args, logger=logger).run()
 
 
 if __name__ == "__main__":
