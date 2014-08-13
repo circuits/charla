@@ -52,7 +52,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        "-d", "--debug",
+        "--debug",
         action="store_true",
         default=False, dest="debug",
         help="Enable debug mode"
