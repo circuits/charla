@@ -29,7 +29,7 @@ from circuits.protocols.irc.replies import (
 )
 
 
-from models import User, UserInfo, Channel
+from models import User, Channel
 
 
 __version__ = "0.0.1"
@@ -185,7 +185,9 @@ class Server(Component):
     def user(self, sock, source, nick, user, host, name):
         _user = self.users[sock]
 
-        _user.userinfo = UserInfo(user, host, name)
+        _user.userinfo.user = user
+        _user.userinfo.host = host
+        _user.userinfo.name = name
 
         _user.registered = True
 
