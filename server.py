@@ -19,7 +19,7 @@ from circuits import handler, Component, Debugger
 from circuits.net.sockets import TCPServer
 from circuits.net.events import close, write
 
-from circuits.protocols.irc import joinprefix, reply, response, IRC, Message
+from circuits.protocols.irc import reply, response, IRC, Message
 
 from circuits.protocols.irc.replies import (
     ERR_NOMOTD, ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, ERR_UNKNOWNCOMMAND,
@@ -27,6 +27,9 @@ from circuits.protocols.irc.replies import (
     RPL_NAMEREPLY, RPL_ENDOFNAMES,
     ERR_NICKNAMEINUSE,
 )
+
+
+from models import User, UserInfo, Channel
 
 
 __version__ = "0.0.1"
@@ -59,41 +62,6 @@ def parse_args():
     )
 
     return parser.parse_args()
-
-
-class Channel(object):
-
-    def __init__(self, name):
-        self.name = name
-
-        self.users = []
-
-
-class User(object):
-
-    def __init__(self, sock, host, port):
-        self.sock = sock
-        self.host = host
-        self.port = port
-
-        self.nick = None
-        self.away = False
-        self.channels = []
-        self.registered = False
-        self.userinfo = UserInfo()
-
-    @property
-    def prefix(self):
-        userinfo = self.userinfo
-        return joinprefix(self.nick, userinfo.user, userinfo.host)
-
-
-class UserInfo(object):
-
-    def __init__(self, user=None, host=None, name=None):
-        self.user = user
-        self.host = host
-        self.name = name
 
 
 class Server(Component):
