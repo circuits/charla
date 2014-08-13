@@ -114,8 +114,7 @@ class Server(Component):
         self.users = {}
         self.channels = {}
 
-        if args.debug:
-            Debugger().register(self)
+        Debugger(events=args.debug, logger=self.logger).register(self)
 
         if ":" in args.bind:
             address, port = args.bind.split(":")
@@ -349,7 +348,7 @@ def main():
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         stream=stderr,
-        level=logging.INFO
+        level=logging.DEBUG if args.debug else logging.INFO
     )
 
     logger = getLogger(__name__)
