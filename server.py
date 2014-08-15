@@ -7,6 +7,7 @@
 import logging
 from logging import getLogger
 
+from time import time
 from sys import stderr
 from itertools import chain
 from operator import attrgetter
@@ -153,7 +154,9 @@ class Server(Component):
         )
 
         del self.users[sock]
-        del self.nicks[nick]
+
+        if nick in self.nicks:
+            del self.nicks[nick]
 
     def quit(self, sock, source, reason="Leaving"):
         user = self.users[sock]
@@ -179,6 +182,10 @@ class Server(Component):
         if nick in self.nicks:
             return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)))
 
+        if not user.registered:
+            user.registered = True
+            self.fire(response.create("signon", sock, user))
+
         user.nick = nick
         self.nicks[nick] = user
 
@@ -189,7 +196,16 @@ class Server(Component):
         _user.userinfo.host = host
         _user.userinfo.name = name
 
-        _user.registered = True
+        if _user.nick is not None:
+            _user.registered = True
+            self.fire(response.create("signon", sock, source))
+
+    def signon(self, sock, source):
+        user = self.users[sock]
+        if user.signon:
+            return
+
+        user.signon = time()
 
         self.fire(reply(sock, RPL_WELCOME(self.network)))
         self.fire(reply(sock, RPL_YOURHOST(self.host, self.version)))
@@ -294,7 +310,7 @@ class Server(Component):
         if message.prefix is None:
             message.prefix = self.host
 
-        self.fire(write(target, str(message)))
+        self.fire(write(target, bytes(message)))
 
     @property
     def commands(self):
