@@ -119,7 +119,11 @@ class Server(Component):
         )
 
     def write(self, sock, data):
-        user = self.users[sock]
+        if sock in self.users:
+            user = self.users[sock]
+        else:
+            user = User(sock, "", 0)
+
         host, port = user.host, user.port
 
         self.logger.info(
