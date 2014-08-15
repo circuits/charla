@@ -27,6 +27,7 @@ class User(object):
         self.nick = None
         self.away = False
         self.channels = []
+        self.signon = None
         self.registered = False
         self.userinfo = UserInfo()
 
