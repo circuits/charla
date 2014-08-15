@@ -182,7 +182,7 @@ class Server(Component):
         if nick in self.nicks:
             return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)))
 
-        if not user.registered:
+        if not user.registered and user.userinfo:
             user.registered = True
             self.fire(response.create("signon", sock, user))
 
@@ -196,7 +196,7 @@ class Server(Component):
         _user.userinfo.host = host
         _user.userinfo.name = name
 
-        if _user.nick is not None:
+        if not _user.registered and _user.nick:
             _user.registered = True
             self.fire(response.create("signon", sock, source))
 

@@ -43,3 +43,6 @@ class UserInfo(object):
         self.user = user
         self.host = host
         self.name = name
+
+    def __nonzero__(self):
+        return all(x is not None for x in (self.user, self.host, self.name))
