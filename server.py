@@ -193,11 +193,12 @@ class Server(Component):
         user.nick = nick
         self.nicks[nick] = user
 
-    def user(self, sock, source, nick, user, host, name):
+    def user(self, sock, source, user, host, server, name):
         _user = self.users[sock]
 
         _user.userinfo.user = user
         _user.userinfo.host = host
+        _user.userinfo.server = server
         _user.userinfo.name = name
 
         if not _user.registered and _user.nick:

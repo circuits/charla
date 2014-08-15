@@ -39,9 +39,10 @@ class User(object):
 
 class UserInfo(object):
 
-    def __init__(self, user=None, host=None, name=None):
+    def __init__(self, user=None, host=None, server=None, name=None):
         self.user = user
         self.host = host
+        self.server = server
         self.name = name
 
     def __nonzero__(self):
