@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+# Module:   main
+# date:     16th August 2014
+# Author:   James Mills, prologic at shortcircuit dot net dot au
+
+
+"""Main Entrypoint"""
 
 
 import sys

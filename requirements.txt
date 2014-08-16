@@ -1,3 +1,7 @@
-redis==2.10.1
-redisco==0.1.4
--e hg+https://bitbucket.org/prologic/circuits#egg=circuits
+cidict==0.1.1
+bidict==0.1.2
+pymills==3.4.0 
+attrdict==0.5.1
+
+# Development version of circuits
+# -e hg+https://bitbucket.org/circuits/circuits#egg=circuits-3.0.0.dev

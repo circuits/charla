@@ -1,9 +1,12 @@
 # Module:   models
-# Date:     13th August 2014
+# Date:     16th August 2014
 # Author:   James Mills, prologic at shortcircuit dot net dot au
 
 
 """Data Models"""
+
+
+from datetime import datetime
 
 
 from circuits.protocols.irc import joinprefix
@@ -19,17 +22,17 @@ class Channel(object):
 
 class User(object):
 
-    def __init__(self, sock, host, port):
+    def __init__(self, sock, host="", port=0):
         self.sock = sock
         self.host = host
         self.port = port
 
         self.nick = None
-        self.away = False
+        self.away = None
         self.channels = []
-        self.signon = None
         self.registered = False
         self.userinfo = UserInfo()
+        self.signon = datetime.now()
 
     @property
     def prefix(self):
@@ -44,6 +47,3 @@ class UserInfo(object):
         self.host = host
         self.server = server
         self.name = name
-
-    def __nonzero__(self):
-        return all(x is not None for x in (self.user, self.host, self.name))

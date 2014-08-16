@@ -1,0 +1,4 @@
+include LICENSE *.rst
+recursive-include bin *
+recursive-include docs *
+recursive-include charla/plugins/web *

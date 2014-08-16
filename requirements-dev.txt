@@ -1,0 +1,15 @@
+cidict==0.1.1
+bidict==0.1.2
+pymills==3.4.0
+attrdict==0.5.1
+
+# Development version of circuits
+-e hg+https://bitbucket.org/circuits/circuits#egg=circuits-3.0.0.dev
+
+wheel==0.23.0
+pudb==2013.5.1
+
+tox==1.6.1
+pytest==2.4.2
+pytest-cov==1.6
+pytest-sugar==0.2.2
