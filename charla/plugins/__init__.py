@@ -27,7 +27,7 @@ from cidict import cidict
 from ..plugin import BasePlugin
 
 
-DEFAULTS = ["core"]
+DEFAULTS = ["core", "message", "channel", "user", "mode", "misc"]
 
 
 class load(Event):
@@ -82,7 +82,7 @@ class Plugins(Component):
             for name, Plugin in plugins:
                 instance = Plugin(*self.init_args, **self.init_kwargs)
                 instance.register(self)
-                self.logger.info(
+                self.logger.debug(
                     "Registered Component: {0:s}".format(instance)
                 )
                 if name not in self.plugins:
@@ -103,7 +103,7 @@ class Plugins(Component):
             instances = self.plugins[name]
             for instance in instances:
                 kill(instance)
-                self.logger.info(
+                self.logger.debug(
                     "Unregistered Component: {0:s}".format(instance)
                 )
                 if hasattr(instance, "cleanup"):

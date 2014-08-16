@@ -116,7 +116,7 @@ class Server(Component):
                 del self.plugins[component.name]
 
     def ready(self, server, bind):
-        stderr.write(
+        self.logger.info(
             "ircd v{0:s} ready! Listening on: {1:s}\n".format(
                 version, "{0:s}:{1:d}".format(*bind)
             )

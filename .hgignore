@@ -1,5 +1,6 @@
 syntax: glob
 
+tmp
 *.pyc
 .cache
 *.egg-info
