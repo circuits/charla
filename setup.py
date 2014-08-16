@@ -57,9 +57,9 @@ setup(
     packages=find_packages("."),
     include_package_data=True,
     scripts=glob("bin/*"),
-    install_requires=(
-        "circuits",
-    ),
+    # install_requires=(
+    #     "circuits",
+    # ),
     entry_points={
         "console_scripts": [
             "charla=charla.main:main",
