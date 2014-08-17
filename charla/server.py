@@ -9,7 +9,6 @@ Main Listening Server Component
 """
 
 
-from sys import stderr
 from logging import getLogger
 from collections import defaultdict
 
@@ -140,10 +139,14 @@ class Server(Component):
         nick = user.nick
         user, host = user.userinfo.user, user.userinfo.host
 
-        yield self.call(
-            response.create("quit", sock, (nick, user, host), "Leavling")
-        )
+        quit = response.create("quit", sock, (nick, user, host), "Leavling")
+        quit.complete = True
+        quit.complete_channels = ("server",)
 
+        self.fire(quit)
+
+    def quit_complete(self, e, value):
+        sock = e.args[0]
         del self.data.users[sock]
 
     def read(self, sock, data):
