@@ -4,3 +4,7 @@
 
 
 """Utilities Module"""
+
+
+def anyof(obj, *types):
+    return any(isinstance(obj, type) for type in types)

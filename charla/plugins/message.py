@@ -17,7 +17,6 @@ from circuits.protocols.irc import reply, Message
 from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
 
 
-from ..events import broadcast
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
 
@@ -31,31 +30,23 @@ class Commands(BaseCommands):
         if target.startswith("#"):
             channel = self.data.channels.get(target)
             if channel is None:
-                return self.fire(
-                    reply(sock, ERR_NOSUCHCHANNEL(target)),
-                    "server"
-                )
+                return ERR_NOSUCHCHANNEL(target)
 
-            self.fire(
-                broadcast(
-                    channel.users,
-                    Message("PRIVMSG", target, message, prefix=user.prefix),
-                    user
-                ),
-                "server"
+            self.notify(
+                channel.users,
+                Message("PRIVMSG", target, message, prefix=user.prefix),
+                user
             )
         else:
             user = self.data.users.get(target)
             if user is None:
-                return self.fire(reply(sock, ERR_NOSUCHNICK(target)), "server")
+                return ERR_NOSUCHNICK(target)
 
-            self.fire(
-                reply(
-                    user.sock,
-                    Message(
-                        event.name.uppwer(), target, message,
-                        prefix=user.prefix
-                    )
+            return reply(
+                user.sock,
+                Message(
+                    event.name.uppwer(), target, message,
+                    prefix=user.prefix
                 )
             )
 

@@ -10,18 +10,19 @@ Main Listening Server Component
 
 
 from logging import getLogger
+from types import GeneratorType
 from collections import defaultdict
 
 
 from bidict import bidict
 from cidict import cidict
 
-from circuits import handler, Component
+from circuits import handler, Component, Event
 
 from circuits.net.events import write
 from circuits.net.sockets import TCPServer
 
-from circuits.protocols.irc import reply, response, IRC
+from circuits.protocols.irc import reply, response, IRC, Message
 
 from circuits.protocols.irc.replies import (
     ERR_NOMOTD, ERR_UNKNOWNCOMMAND,
@@ -29,6 +30,7 @@ from circuits.protocols.irc.replies import (
 )
 
 
+from .utils import anyof
 from .models import User
 from .version import version
 from .plugin import BasePlugin
@@ -193,15 +195,49 @@ class Server(Component):
 
         self.fire(write(sock, bytes(message)))
 
-    @handler()
+    @handler()  # noqa
     def _on_event(self, event, *args, **kwargs):
-        if event.name.endswith("_done"):
+        name = event.name
+        if name in ("generate_events",) or name.endswith("_done"):
             return
 
-        if isinstance(event, response):
+        if name.endswith("_complete") and isinstance(args[0], response):
+            e, value = args
+            if value is None:
+                return
+
+            values = (
+                (value,) if not anyof(value, GeneratorType, tuple, list)
+                else value
+            )
+
+            sock, source = e.args[:2]
+            args = e.args[2:]
+
+            # user = self.data.users[sock]
+
+            for value in values:
+                if isinstance(value, Message):
+                    self.fire(reply(sock, value))
+                elif isinstance(value, Event):
+                    self.fire(value)
+                else:
+                    self.logger.warn(
+                        (
+                            "Handler for {0:s} returned "
+                            "unknown type {1:s} ({2:s})"
+                        ).format(
+                            name,
+                            value.__class__.__name__,
+                            repr(value)
+                        )
+                    )
+        elif isinstance(event, response):
             sock = args[0]
             if event.name not in self.command:
                 event.stop()
                 return self.fire(reply(sock, ERR_UNKNOWNCOMMAND(event.name)))
 
+            event.complete = True
+            event.complete_channels = ("server",)
             self.fire(event, "commands")

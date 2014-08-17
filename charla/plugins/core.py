@@ -14,7 +14,7 @@ from operator import attrgetter
 from itertools import chain, imap
 
 
-from circuits.protocols.irc import reply, Message
+from circuits.protocols.irc import Message
 
 from circuits.protocols.irc.replies import ERR_NICKNAMEINUSE
 
@@ -46,14 +46,14 @@ class Commands(BaseCommands):
         user = self.data.users[sock]
 
         if nick in imap(attrgetter("nick"), self.data.users.itervalues()):
-            return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)), "server")
+            return ERR_NICKNAMEINUSE(nick)
 
         prefix = user.prefix
         user.nick = nick
 
         if not user.registered and user.userinfo:
             user.registered = True
-            return self.fire(signon(sock, source), "server")
+            return signon(sock, source)
 
         users = chain(*map(attrgetter("users"), user.channels))
 
@@ -66,7 +66,7 @@ class Commands(BaseCommands):
 
         if not _user.registered and _user.nick:
             _user.registered = True
-            self.fire(signon(sock, source), "server")
+            return signon(sock, source)
 
 
 class CorePlugin(BasePlugin):

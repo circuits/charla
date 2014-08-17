@@ -10,7 +10,7 @@ __version__ = "0.0.1"
 __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
 
-from circuits.protocols.irc import reply, Message
+from circuits.protocols.irc import Message
 
 
 from ..plugin import BasePlugin
@@ -20,7 +20,7 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def ping(self, sock, source, server):
-        self.fire(reply(sock, Message("PONG", server)))
+        return Message("PONG", server)
 
 
 class MiscPlugin(BasePlugin):

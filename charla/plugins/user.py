@@ -10,8 +10,6 @@ __version__ = "0.0.1"
 __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
 
-from circuits.protocols.irc import reply
-
 from circuits.protocols.irc.replies import (
     ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL,
     RPL_WHOREPLY, RPL_ENDOFWHO,
@@ -28,34 +26,21 @@ class Commands(BaseCommands):
         if mask.startswith("#"):
             channel = self.data.channels.get(mask)
             if channel is None:
-                return self.fire(
-                    reply(sock, ERR_NOSUCHCHANNEL(mask)),
-                    "server"
-                )
+                return ERR_NOSUCHCHANNEL(mask)
 
-            for user in channel.users:
-                self.fire(
-                    reply(
-                        sock,
-                        RPL_WHOREPLY(user, mask, self.parent.server.host)
-                    ),
-                    "server"
-                )
-            self.fire(reply(sock, RPL_ENDOFWHO(mask)), "server")
+            return [
+                RPL_WHOREPLY(user, mask, self.parent.server.host)
+                for user in channel.users
+            ] + [RPL_ENDOFWHO(mask)]
         else:
             user = self.data.users.get(mask)
             if user is None:
-                return self.fire(reply(sock, ERR_NOSUCHNICK(mask)), "server")
+                return ERR_NOSUCHNICK(mask)
 
-            self.fire(
-                reply(
-                    sock,
-                    RPL_WHOREPLY(user, mask, self.parent.server.host)
-                ),
-                "server"
+            return (
+                RPL_WHOREPLY(user, mask, self.parent.server.host),
+                RPL_ENDOFWHO(mask)
             )
-
-            self.fire(reply(sock, RPL_ENDOFWHO(mask)), "server")
 
 
 class UserPlugin(BasePlugin):

@@ -11,6 +11,8 @@ This module provides a base component for all commands handling.
 
 from circuits import handler, Component
 
+from circuits.net.events import close
+
 
 from .events import broadcast
 
@@ -26,8 +28,8 @@ class BaseCommands(Component):
 
     @handler(False)
     def disconnect(self, user):
-        self.fire(close(user.sock))
+        self.fire(close(user.sock), self.server.channel)
 
     @handler(False)
-    def notify(self, users, message):
-        self.fire(broadcast(users, message), self.server.channel)
+    def notify(self, users, message, *exclude):
+        self.fire(broadcast(users, message, *exclude), self.server.channel)

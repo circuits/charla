@@ -10,7 +10,7 @@ __version__ = "0.0.1"
 __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
 
-from circuits.protocols.irc import reply, Message
+from circuits.protocols.irc import Message
 
 from circuits.protocols.irc.replies import (
     RPL_NOTOPIC, RPL_NAMEREPLY, RPL_ENDOFNAMES,
@@ -18,7 +18,6 @@ from circuits.protocols.irc.replies import (
 
 
 from ..models import Channel
-from ..events import broadcast
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
 
@@ -36,26 +35,20 @@ class Commands(BaseCommands):
         if user in channel.users:
             return
 
-        self.fire(
-            broadcast(
-                channel.users[:],
-                Message("JOIN", name, prefix=user.prefix)
-            ),
-            "server"
+        self.notify(
+            channel.users[:],
+            Message("JOIN", name, prefix=user.prefix)
         )
 
-        self.fire(
-            reply(sock, Message("JOIN", name, prefix=user.prefix)),
-            "server"
-        )
+        yield Message("JOIN", name, prefix=user.prefix)
 
         channel.users.append(user)
 
         user.channels.append(channel)
 
-        self.fire(reply(sock, RPL_NOTOPIC(name)), "server")
-        self.fire(reply(sock, RPL_NAMEREPLY(channel)), "server")
-        self.fire(reply(sock, RPL_ENDOFNAMES()), "server")
+        yield RPL_NOTOPIC(name)
+        yield RPL_NAMEREPLY(channel)
+        yield RPL_ENDOFNAMES()
 
     def part(self, sock, source, name, reason="Leaving"):
         user = self.data.users[sock]
@@ -68,12 +61,9 @@ class Commands(BaseCommands):
         if user not in channel.users:
             return
 
-        self.fire(
-            broadcast(
-                channel.users,
-                Message("PART", name, reason, prefix=user.prefix)
-            ),
-            "server"
+        self.notify(
+            channel.users,
+            Message("PART", name, reason, prefix=user.prefix)
         )
 
         user.channels.remove(channel)
