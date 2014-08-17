@@ -149,7 +149,8 @@ class Server(Component):
 
     def quit_complete(self, e, value):
         sock = e.args[0]
-        del self.data.users[sock]
+        if sock in self.data.users:
+            del self.data.users[sock]
 
     def read(self, sock, data):
         user = self.data.users[sock]
