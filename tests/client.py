@@ -10,7 +10,7 @@ from circuits import handler, Component
 
 from circuits.net.sockets import TCPClient, connect
 
-from circuits.protocols.irc import IRC
+from circuits.protocols.irc import response, IRC
 
 
 class Client(Component):
@@ -38,4 +38,5 @@ class Client(Component):
 
     @handler()
     def _on_event(self, event, *args, **kwargs):
-        self.events.append(event)
+        if isinstance(event, response):
+            self.events.append(event)
