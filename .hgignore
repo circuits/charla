@@ -3,5 +3,7 @@ syntax: glob
 tmp
 *.pyc
 .cache
+coverage
+.coverage
 *.egg-info
 __pycache__

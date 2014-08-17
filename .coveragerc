@@ -1,0 +1,10 @@
+[run]
+omit = charla/__init__.py
+       charla/plugins/__init__.py
+       tests/*
+
+[html]
+directory = coverage
+
+[xml]
+output = coverage.xml
