@@ -1,9 +1,9 @@
-# Plugin:   connection
+# Plugin:   core
 # Date:     16th August 2014
 # Author:   James Mills, prologic at shortcircuit dot net dot au
 
 
-"""Connection Plugin"""
+"""Core Plugin"""
 
 
 __version__ = "0.0.1"
