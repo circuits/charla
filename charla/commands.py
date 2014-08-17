@@ -9,7 +9,10 @@ This module provides a base component for all commands handling.
 """
 
 
-from circuits import Component
+from circuits import handler, Component
+
+
+from .events import broadcast
 
 
 class BaseCommands(Component):
@@ -20,3 +23,11 @@ class BaseCommands(Component):
         self.server = server
         self.config = config
         self.data = data
+
+    @handler(False)
+    def disconnect(self, user):
+        self.fire(close(user.sock))
+
+    @handler(False)
+    def notify(self, users, message):
+        self.fire(broadcast(users, message), self.server.channel)

@@ -14,17 +14,15 @@ from operator import attrgetter
 from itertools import chain, imap
 
 
-from circuits.net.events import close
-
 from circuits.protocols.irc import reply, Message
 
 from circuits.protocols.irc.replies import ERR_NICKNAMEINUSE
 
 
+from ..events import signon
 from ..models import UserInfo
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..events import broadcast, signon
 
 
 class Commands(BaseCommands):
@@ -40,10 +38,9 @@ class Commands(BaseCommands):
 
         users = chain(*map(attrgetter("users"), user.channels))
 
-        self.fire(close(sock), "server")
+        self.disconnect(user)
 
-        msg = Message("QUIT", reason, prefix=user.prefix)
-        self.fire(broadcast(users, msg, user), "server")
+        self.notify(users, Message("QUIT", reason, prefix=user.prefix), user)
 
     def nick(self, sock, source, nick):
         user = self.data.users[sock]
@@ -51,11 +48,16 @@ class Commands(BaseCommands):
         if nick in imap(attrgetter("nick"), self.data.users.itervalues()):
             return self.fire(reply(sock, ERR_NICKNAMEINUSE(nick)), "server")
 
+        prefix = user.prefix
+        user.nick = nick
+
         if not user.registered and user.userinfo:
             user.registered = True
-            self.fire(signon(sock, source), "server")
+            return self.fire(signon(sock, source), "server")
 
-        user.nick = nick
+        users = chain(*map(attrgetter("users"), user.channels))
+
+        self.notify(users, Message("NICK", nick, prefix=prefix))
 
     def user(self, sock, source, user, host, server, name):
         _user = self.data.users[sock]
