@@ -37,6 +37,13 @@ class Client(Component):
         self.connected = False
 
     @handler()
-    def _on_event(self, event, *args, **kwargs):
+    def on_event(self, event, *args, **kwargs):
         if isinstance(event, response):
             self.events.append(event)
+
+    @handler(False)
+    def expect(self, name, args):
+        for event in self.events:
+            if event.name == name and event.args == args:
+                return True
+        return False
