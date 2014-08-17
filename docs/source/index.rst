@@ -8,7 +8,6 @@
 charla |version| Documentation
 ==============================
 
-
 :Release: |release|
 :Date: |today|
 
@@ -25,34 +24,24 @@ About
 Documentation
 =============
 
-
 .. toctree::
    :maxdepth: 1
 
-   api/index
+   api/charla
    changes
    roadmap
+   todo
 
+.. toctree::
+   :hidden:
 
-.. ifconfig:: devel
-
-   .. toctree::
-      :hidden:
-
-      todo
-      readme
+   glossary
 
 
 Indices and tables
 ==================
 
-
 * :ref:`Index <genindex>`
 * :ref:`modindex`
 * :ref:`search`
 * :doc:`glossary`
-
-.. ifconfig:: devel
-
-   * :doc:`todo`
-   * :doc:`readme`

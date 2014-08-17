@@ -6,4 +6,5 @@ tmp
 coverage
 .coverage
 *.egg-info
+docs/build
 __pycache__

@@ -6,4 +6,4 @@ Change Log
 ==========
 
 
-- :release:`1.0.0 <yyyymmdd` -- Initial Release
+- :release:`0.0.1 <20140915>`
