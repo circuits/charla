@@ -144,8 +144,7 @@ class Server(Component):
             response.create("quit", sock, (nick, user, host), "Leavling")
         )
 
-        user.delete()
-        user.save()
+        del self.data.users[sock]
 
     def read(self, sock, data):
         user = self.data.users[sock]
