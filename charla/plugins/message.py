@@ -12,12 +12,13 @@ __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
 from circuits import handler
 
-from circuits.protocols.irc import reply, Message
+from circuits.protocols.irc import joinprefix, reply, Message
 
 from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
 
 
 from ..plugin import BasePlugin
+from ..models import Channel, User
 from ..commands import BaseCommands
 
 
@@ -25,20 +26,22 @@ class Commands(BaseCommands):
 
     @handler("privmsg", "notice")
     def on_privmsg_or_notice(self, event, sock, source, target, message):
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
+
+        prefix = user.prefix or joinprefix(*source)
 
         if target.startswith("#"):
-            channel = self.data.channels.get(target)
+            channel = Channel.objects(name=target).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
             self.notify(
                 channel.users,
-                Message("PRIVMSG", target, message, prefix=user.prefix),
+                Message("PRIVMSG", target, message, prefix=prefix),
                 user
             )
         else:
-            user = self.data.users.get(target)
+            user = User.objects(nick=target)
             if user is None:
                 return ERR_NOSUCHNICK(target)
 
@@ -46,7 +49,7 @@ class Commands(BaseCommands):
                 user.sock,
                 Message(
                     event.name.uppwer(), target, message,
-                    prefix=user.prefix
+                    prefix=prefix
                 )
             )
 

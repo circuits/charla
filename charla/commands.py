@@ -21,10 +21,10 @@ class BaseCommands(Component):
 
     channel = "commands"
 
-    def init(self, server, config, data):
+    def init(self, server, config, db):
         self.server = server
         self.config = config
-        self.data = data
+        self.db = db
 
     @handler(False)
     def disconnect(self, user):

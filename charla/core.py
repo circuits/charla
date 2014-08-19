@@ -5,7 +5,7 @@
 
 """Core Module
 
-Crates server and data components, loads plugins and handles process signals.
+Crates server component, load plugins and handles process signals.
 """
 
 
@@ -17,7 +17,7 @@ from circuits import handler, BaseComponent, Timer
 
 from circuits.protocols.irc import Message
 
-from .data import Data
+from .models import User
 from .server import Server
 from .plugins import Plugins
 from .events import broadcast, terminate
@@ -27,17 +27,16 @@ class Core(BaseComponent):
 
     channel = "core"
 
-    def init(self, config):
+    def init(self, config, db):
         self.config = config
-
-        self.data = Data()
+        self.db = db
 
         self.logger = getLogger(__name__)
 
-        self.server = Server(self.config, self.data).register(self)
+        self.server = Server(self.config, self.db).register(self)
 
         self.plugins = Plugins(
-            init_args=(self.server, self.config, self.data)
+            init_args=(self.server, self.config, self.db)
         ).register(self)
 
         self.logger.info("Loading plugins...")
@@ -52,7 +51,7 @@ class Core(BaseComponent):
             Timer(5, terminate()).register(self)
             self.fire(
                 broadcast(
-                    self.data.users.values(),
+                    User.objects,
                     Message("NOTICE", "Received SIGTERM, terminating...")
                 ),
                 self.server

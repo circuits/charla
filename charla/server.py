@@ -14,7 +14,6 @@ from types import GeneratorType
 from collections import defaultdict
 
 
-from bidict import bidict
 from cidict import cidict
 
 from circuits import handler, Component, Event
@@ -44,9 +43,9 @@ class Server(Component):
     host = "localhost"
     version = "ircd v{0:s}".format(version)
 
-    def init(self, config, data):
+    def init(self, config, db):
         self.config = config
-        self.data = data
+        self.db = db
 
         self.logger = getLogger(__name__)
 
@@ -58,11 +57,6 @@ class Server(Component):
 
         # plugin name -> plugin
         self.plugins = cidict()
-
-        self.data.init({
-            "users": bidict(),
-            "channels": cidict(),
-        })
 
         self.buffers = defaultdict(bytes)
 
@@ -124,17 +118,13 @@ class Server(Component):
         )
 
     def connect(self, sock, host, port):
-        user = User(sock, host, port)
-
-        self.data.users[sock] = user
+        user = User(sock=sock, host=host, port=port)
+        user.save()
 
         self.logger.info("C: [{0:s}:{1:d}]".format(host, port))
 
     def disconnect(self, sock):
-        if sock not in self.data.users:
-            return
-
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
 
         self.logger.info("D: [{0:s}:{1:d}]".format(user.host, user.port))
 
@@ -149,11 +139,11 @@ class Server(Component):
 
     def quit_complete(self, e, value):
         sock = e.args[0]
-        if sock in self.data.users:
-            del self.data.users[sock]
+        user = User.objects(sock=sock).first()
+        user.delete()
 
     def read(self, sock, data):
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
 
         host, port = user.host, user.port
 
@@ -162,7 +152,7 @@ class Server(Component):
         )
 
     def write(self, sock, data):
-        user = self.data.users.get(sock, User(sock))
+        user = User.objects(sock=sock).first()
 
         host, port = user.host, user.port
 
@@ -186,7 +176,7 @@ class Server(Component):
         self.fire(response.create("join", sock, source, "#circuits"))
 
     def reply(self, sock, message):
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
 
         if message.add_nick:
             message.args.insert(0, user.nick or "")
@@ -214,8 +204,6 @@ class Server(Component):
 
             sock, source = e.args[:2]
             args = e.args[2:]
-
-            # user = self.data.users[sock]
 
             for value in values:
                 if isinstance(value, Message):

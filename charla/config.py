@@ -93,6 +93,26 @@ class Config(reprconf.Config):
         )
 
         add(
+            "--dbname", action="store", default="charla",
+            dest="dbname", metavar="NAME", type=str,
+            help="store data in database NAME (Mongo)"
+        )
+
+        add(
+            "--dbhost", action="store",
+            default=environ.get("MONGO_PORT_27017_TCP_ADDR", "localhost"),
+            dest="dbhost", metavar="HOST", type=str,
+            help="set database host to HOST (Mongo)"
+        )
+
+        add(
+            "--dbport", action="store",
+            default=int(environ.get("MONGO_PORT_27017_TCP_PORT", "27017")),
+            dest="dbport", metavar="PORT", type=int,
+            help="set database port to PORT (Mongo)"
+        )
+
+        add(
             "-p", "--plugin",
             action="append", default=plugins.DEFAULTS, dest="plugins",
             help="Plugin to load (multiple allowed)"

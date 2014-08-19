@@ -17,6 +17,7 @@ from circuits.protocols.irc.replies import (
 
 
 from ..plugin import BasePlugin
+from ..models import Channel, User
 from ..commands import BaseCommands
 
 
@@ -24,7 +25,7 @@ class Commands(BaseCommands):
 
     def who(self, sock, source, mask):
         if mask.startswith("#"):
-            channel = self.data.channels.get(mask)
+            channel = Channel.objects(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
 
@@ -33,7 +34,7 @@ class Commands(BaseCommands):
                 for user in channel.users
             ] + [RPL_ENDOFWHO(mask)]
         else:
-            user = self.data.users.get(mask)
+            user = User.objects(nick=mask)
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 

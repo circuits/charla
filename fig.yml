@@ -1,4 +1,10 @@
+mongo:
+    image: mongo
+
 charla:
     build: .
+    links:
+      - mongo:mongo
     ports:
       - "6667:6667"
+    command: --debug

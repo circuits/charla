@@ -1,6 +1,7 @@
 cidict==0.1.1
 pymills==3.4.0 
 attrdict==0.5.1
+mongoengine==0.8.7
 
 # My fork of bidict
 -e hg+https://bitbucket.org/prologic/bidict#egg=bidict

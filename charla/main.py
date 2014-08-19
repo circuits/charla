@@ -20,8 +20,11 @@ from logging import getLogger
 from circuits.app import Daemon
 from circuits import Debugger, Manager, Worker
 
+from mongoengine import connect
+
 
 from .core import Core
+from .utils import waitfor
 from .config import Config
 
 
@@ -40,10 +43,38 @@ def setup_logging(config):
     return getLogger(__name__)
 
 
+def setup_database(config, logger):
+    dbname = config["dbname"]
+    dbhost = config["dbhost"]
+    dbport = config["dbport"]
+
+    logger.debug(
+        "Waiting for Mogno Service on {0:s}:{1:d} ...".format(dbhost, dbport)
+    )
+
+    waitfor(dbhost, dbport)
+
+    logger.debug(
+        "Connecting to Mongo Database {0:s} on {1:s}:{2:d} ...".format(
+            dbname, dbhost, dbport
+        )
+    )
+
+    db = connect(dbname, host=dbhost, port=dbport)
+
+    logger.debug("Success!")
+
+    db.drop_database(dbname)
+
+    return db
+
+
 def main():
     config = Config()
 
     logger = setup_logging(config)
+
+    db = setup_database(config, logger)
 
     manager = Manager()
 
@@ -59,7 +90,7 @@ def main():
     if config["daemon"]:
         Daemon(config["pidfile"]).register(manager)
 
-    Core(config).register(manager)
+    Core(config, db).register(manager)
 
     manager.run()
 

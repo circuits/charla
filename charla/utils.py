@@ -6,5 +6,15 @@
 """Utilities Module"""
 
 
+from time import sleep
+from socket import AF_INET, SOCK_STREAM, socket
+
+
 def anyof(obj, *types):
     return any(isinstance(obj, type) for type in types)
+
+
+def waitfor(address, port, timeout=10):
+    sock = socket(AF_INET, SOCK_STREAM)
+    while not sock.connect_ex((address, port)) == 0 and timeout:
+        sleep(1)

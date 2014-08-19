@@ -17,20 +17,20 @@ from circuits.protocols.irc.replies import (
 )
 
 
-from ..models import Channel
 from ..plugin import BasePlugin
+from ..models import Channel, User
 from ..commands import BaseCommands
 
 
 class Commands(BaseCommands):
 
     def join(self, sock, source, name):
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
 
-        if name in self.data.channels:
-            channel = self.data.channels[name]
-        else:
-            channel = self.data.channels[name] = Channel(name)
+        channel = Channel.objects(name=name).first()
+        if channel is None:
+            channel = Channel(name=name)
+            channel.save()
 
         if user in channel.users:
             return
@@ -40,20 +40,23 @@ class Commands(BaseCommands):
             Message("JOIN", name, prefix=user.prefix)
         )
 
-        yield Message("JOIN", name, prefix=user.prefix)
+        user.channels.append(channel)
+        user.save()
 
         channel.users.append(user)
+        channel.save()
 
-        user.channels.append(channel)
-
-        yield RPL_NOTOPIC(name)
-        yield RPL_NAMEREPLY(channel)
-        yield RPL_ENDOFNAMES()
+        return (
+            Message("JOIN", name, prefix=user.prefix),
+            RPL_NOTOPIC(name),
+            RPL_NAMEREPLY(channel),
+            RPL_ENDOFNAMES()
+        )
 
     def part(self, sock, source, name, reason="Leaving"):
-        user = self.data.users[sock]
+        user = User.objects(sock=sock).first()
 
-        channel = self.data.channels.get(name)
+        channel = Channel.objects(name=name).first()
 
         if channel is None:
             return
@@ -67,10 +70,13 @@ class Commands(BaseCommands):
         )
 
         user.channels.remove(channel)
+        user.save()
+
         channel.users.remove(user)
+        channel.save()
 
         if not channel.users:
-            del self.data.channels[name]
+            channel.delete()
 
 
 class ChannelPlugin(BasePlugin):

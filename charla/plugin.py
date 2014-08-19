@@ -17,7 +17,7 @@ class BasePlugin(BaseComponent):
 
     channel = "server"
 
-    def init(self, server, config, data):
+    def init(self, server, config, db):
         self.server = server
         self.config = config
-        self.data = data
+        self.db = db
