@@ -1,6 +1,7 @@
 .. _Python: http://python.org/
 .. _circuits: http://circuitsframework.org/
-.. _docker: http://docker.com/
+.. _Docker: http://docker.com/
+.. _fig: http://fig.sh/
 
 
 charla
@@ -19,6 +20,12 @@ From Source::
     $ hg clone https://bitbucket.org/circuits/charla
     $ cd charla
     $ ./server.py
+
+From Source using `fig`_ and `Docker`_::
+    
+    $ hg clone https://bitbucket.org/circuits/charla
+    $ cd charla
+    $ fig up
 
 Using `Docker`_::
     
