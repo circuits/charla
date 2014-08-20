@@ -37,7 +37,12 @@ class SocketField(Attribute):
             self.cache[fd] = value
             return fd
         except SocketError:
-            return None
+            try:
+                fd = self.cache[:value]
+                self.cache[fd] = value
+                return fd
+            except KeyError:
+                return None
 
     def value_type(self):
         return socket
