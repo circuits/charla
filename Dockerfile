@@ -16,4 +16,4 @@ RUN pip install -r /tmp/requirements.txt && rm /tmp/requirements.txt
 # Application
 WORKDIR /app
 ADD . /app
-RUN python setup.py install
+RUN pip install .
