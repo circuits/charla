@@ -142,6 +142,9 @@ class Server(Component):
     def quit_complete(self, e, value):
         sock = e.args[0]
         user = User.objects.filter(sock=sock).first()
+        if user is None:
+            return
+
         user.delete()
 
     def read(self, sock, data):
