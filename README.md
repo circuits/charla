@@ -12,7 +12,13 @@ From Source:
     $ cd charla
     $ ./server.py
 
-Using Docker\_:
+From Source using [fig][] and [Docker][]:
+
+    $ hg clone https://bitbucket.org/circuits/charla
+    $ cd charla
+    $ fig up
+
+Using [Docker][]:
 
     $ docker run -d 6667:6667 prologic/charla
 
@@ -24,3 +30,5 @@ From PyPi (*ccoming soon*):
   [Spanish for chat]: http://www.spanishcentral.com/translate/charla
   [Python]: http://python.org/
   [circuits]: http://circuitsframework.org/
+  [fig]: http://fig.sh/
+  [Docker]: http://docker.com/
