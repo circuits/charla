@@ -6,83 +6,69 @@
 """Data Models"""
 
 
-from datetime import datetime
-from socket import error as SocketError
+from operator import attrgetter
+from socket import socket, error as SocketError
 
 
 from bidict import bidict
 
 from circuits.protocols.irc import joinprefix
 
-from mongoengine import EmbeddedDocument, Document
-from mongoengine.fields import (
-    BaseField, BooleanField, DateTimeField, EmbeddedDocumentField,
-    IntField, ListField, ReferenceField, StringField
+from redisco.models import Model
+from redisco.models import (
+    Attribute, BooleanField, DateTimeField,
+    IntegerField, ListField, ReferenceField
 )
 
 
-class SocketField(BaseField):
+class SocketField(Attribute):
 
     cache = bidict()
 
-    def __init__(self, **kwargs):
-        super(SocketField, self).__init__(**kwargs)
+    def typecast_for_read(self, value):
+        return self.cache[int(value)]
 
-    def to_mongo(self, value):
-        print("SocketField.to_mongo:")
-        fd = value.fileno()
-        self.cache[fd] = value
-        return fd
+    def typecast_for_storage(self, value):
+        if value is None:
+            return None
 
-    def to_python(self, value):
-        print("SocketField.to_python:")
-        return self.cache[value] if value in self.cache else value
-
-    def prepare_query_value(self, op, v):
-        print("SocketField.prepare_query_value:")
         try:
-            return v.fileno()
+            fd = value.fileno()
+            self.cache[fd] = value
+            return fd
         except SocketError:
             return None
 
+    def value_type(self):
+        return socket
 
-class Channel(Document):
-
-    name = StringField(primary_key=True, required=True, unique=True)
-
-    users = ListField(ReferenceField("User"))
-
-
-class UserInfo(EmbeddedDocument):
-
-    user = StringField()
-    host = StringField()
-    name = StringField()
-    server = StringField()
+    def acceptable_types(self):
+        return self.value_type()
 
 
-class User(Document):
+class User(Model):
 
-    sock = SocketField(required=True, unique=True)
+    sock = SocketField(required=True)
+    host = Attribute(default="")
+    port = IntegerField(default=0)
 
-    host = StringField()
-    port = IntField()
+    nick = Attribute(default=None)
+    away = Attribute(default=None)
 
-    nick = StringField(default=None)
-    away = StringField(default=None)
-
-    channels = ListField(ReferenceField("Channel"))
+    channels = ListField("Channel")
+    userinfo = ReferenceField("UserInfo")
 
     registered = BooleanField(default=False)
+    signon = DateTimeField(auto_now_add=True)
 
-    userinfo = EmbeddedDocumentField("UserInfo")
+    def __repr__(self):
+        attrs = self.attributes_dict.copy()
+        attrs["channels"] = map(attrgetter("name"), attrs["channels"])
 
-    signon = DateTimeField(default=datetime.now)
+        if not self.is_new():
+            return "<%s %s>" % (self.key(), attrs)
 
-    def delete(self, *args, **kwargs):
-        print("User.delete")
-        del SocketField.cache[:self.sock]
-        super(User, self).delete(*args, **kwargs)
+        return "<%s %s>" % (self.__class__.__name__, attrs)
 
     @property
     def prefix(self):
@@ -90,3 +76,35 @@ class User(Document):
         if userinfo is None:
             return
         return joinprefix(self.nick, userinfo.user, userinfo.host)
+
+    class Meta:
+        indices = ("id", "sock", "nick",)
+
+
+class UserInfo(Model):
+
+    user = Attribute(default=None)
+    host = Attribute(default=None)
+    server = Attribute(default=None)
+    name = Attribute(default=None)
+
+    def __nonzero__(self):
+        return all(x is not None for x in (self.user, self.host, self.name))
+
+
+class Channel(Model):
+
+    name = Attribute(required=True, unique=True)
+    users = ListField("User")
+
+    def __repr__(self):
+        attrs = self.attributes_dict.copy()
+        attrs["users"] = map(attrgetter("nick"), attrs["users"])
+
+        if not self.is_new():
+            return "<%s %s>" % (self.key(), attrs)
+
+        return "<%s %s>" % (self.__class__.__name__, attrs)
+
+    class Meta:
+        indices = ("id", "name",)

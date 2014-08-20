@@ -25,7 +25,7 @@ class Commands(BaseCommands):
 
     def who(self, sock, source, mask):
         if mask.startswith("#"):
-            channel = Channel.objects(name=mask).first()
+            channel = Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
 
@@ -34,7 +34,7 @@ class Commands(BaseCommands):
                 for user in channel.users
             ] + [RPL_ENDOFWHO(mask)]
         else:
-            user = User.objects(nick=mask)
+            user = User.objects.filter(nick=mask)
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 

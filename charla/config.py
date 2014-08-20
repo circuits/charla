@@ -93,23 +93,17 @@ class Config(reprconf.Config):
         )
 
         add(
-            "--dbname", action="store", default="charla",
-            dest="dbname", metavar="NAME", type=str,
-            help="store data in database NAME (Mongo)"
-        )
-
-        add(
             "--dbhost", action="store",
-            default=environ.get("MONGO_PORT_27017_TCP_ADDR", "localhost"),
+            default=environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost"),
             dest="dbhost", metavar="HOST", type=str,
-            help="set database host to HOST (Mongo)"
+            help="set database host to HOST (Redis)"
         )
 
         add(
             "--dbport", action="store",
-            default=int(environ.get("MONGO_PORT_27017_TCP_PORT", "27017")),
+            default=int(environ.get("REDIS_PORT_6379_TCP_PORT", "6379")),
             dest="dbport", metavar="PORT", type=int,
-            help="set database port to PORT (Mongo)"
+            help="set database port to PORT (Redis)"
         )
 
         add(

@@ -26,12 +26,12 @@ class Commands(BaseCommands):
 
     @handler("privmsg", "notice")
     def on_privmsg_or_notice(self, event, sock, source, target, message):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
         prefix = user.prefix or joinprefix(*source)
 
         if target.startswith("#"):
-            channel = Channel.objects(name=target).first()
+            channel = Channel.objects.filter(name=target).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
@@ -41,7 +41,7 @@ class Commands(BaseCommands):
                 user
             )
         else:
-            user = User.objects(nick=target)
+            user = User.objects.filter(nick=target)
             if user is None:
                 return ERR_NOSUCHNICK(target)
 

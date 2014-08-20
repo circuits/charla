@@ -25,9 +25,9 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def join(self, sock, source, name):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
-        channel = Channel.objects(name=name).first()
+        channel = Channel.objects.filter(name=name).first()
         if channel is None:
             channel = Channel(name=name)
             channel.save()
@@ -54,9 +54,9 @@ class Commands(BaseCommands):
         )
 
     def part(self, sock, source, name, reason="Leaving"):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
-        channel = Channel.objects(name=name).first()
+        channel = Channel.objects.filter(name=name).first()
 
         if channel is None:
             return

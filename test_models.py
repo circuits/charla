@@ -6,14 +6,15 @@ from __future__ import print_function
 from socket import socket
 
 
-from mongoengine import connect
+from redisco import connection_setup, get_client
 
 
 from charla.models import User, Channel
 
 
-db = connect("test")
-db.drop_database("test")
+connection_setup()
+db = get_client()
+db.flushall()
 
 user = User(sock=socket(), nick="foo")
 user.save()
@@ -26,5 +27,7 @@ channel.save()
 user.channels.append(channel)
 user.save()
 
+x = Channel.objects.filter(name="#foo").first()
+
 print()
-print(Channel.objects(name="#foo").first().users)
+print(Channel.objects.filter(name="#foo").first().users)

@@ -2,6 +2,9 @@ cidict==0.1.1
 pymills==3.4.0
 attrdict==0.5.1
 
+# Development version of redisco
+-e git+https://github.com/kiddouk/redisco.git#egg=redisco
+
 # My fork of bidict
 -e hg+https://bitbucket.org/prologic/bidict#egg=bidict
 

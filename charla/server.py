@@ -124,7 +124,9 @@ class Server(Component):
         self.logger.info("C: [{0:s}:{1:d}]".format(host, port))
 
     def disconnect(self, sock):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
+        if user is None:
+            return
 
         self.logger.info("D: [{0:s}:{1:d}]".format(user.host, user.port))
 
@@ -139,11 +141,11 @@ class Server(Component):
 
     def quit_complete(self, e, value):
         sock = e.args[0]
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
         user.delete()
 
     def read(self, sock, data):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
         host, port = user.host, user.port
 
@@ -152,7 +154,9 @@ class Server(Component):
         )
 
     def write(self, sock, data):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
+        if user is None:
+            return
 
         host, port = user.host, user.port
 
@@ -176,7 +180,7 @@ class Server(Component):
         self.fire(response.create("join", sock, source, "#circuits"))
 
     def reply(self, sock, message):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
         if message.add_nick:
             message.args.insert(0, user.nick or "")

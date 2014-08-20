@@ -1,10 +1,10 @@
-mongo:
-    image: mongo
+redis:
+    image: redis
 
 charla:
     build: .
     links:
-      - mongo:mongo
+      - redis:redis
     ports:
       - "6667:6667"
     command: --debug

@@ -20,7 +20,7 @@ from logging import getLogger
 from circuits.app import Daemon
 from circuits import Debugger, Manager, Worker
 
-from mongoengine import connect
+from redisco import connection_setup, get_client
 
 
 from .core import Core
@@ -44,27 +44,25 @@ def setup_logging(config):
 
 
 def setup_database(config, logger):
-    dbname = config["dbname"]
     dbhost = config["dbhost"]
     dbport = config["dbport"]
 
     logger.debug(
-        "Waiting for Mogno Service on {0:s}:{1:d} ...".format(dbhost, dbport)
+        "Waiting for Redis Service on {0:s}:{1:d} ...".format(dbhost, dbport)
     )
 
     waitfor(dbhost, dbport)
 
     logger.debug(
-        "Connecting to Mongo Database {0:s} on {1:s}:{2:d} ...".format(
-            dbname, dbhost, dbport
-        )
+        "Connecting to Redis on {0:s}:{1:d} ...".format(dbhost, dbport)
     )
 
-    db = connect(dbname, host=dbhost, port=dbport)
+    connection_setup(host=dbhost, port=dbport)
 
     logger.debug("Success!")
 
-    db.drop_database(dbname)
+    db = get_client()
+    db.flushall()
 
     return db
 

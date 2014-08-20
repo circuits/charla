@@ -28,7 +28,7 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def quit(self, sock, source, reason="Leaving"):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
         for channel in user.channels:
             channel.users.remove(user)
@@ -43,7 +43,7 @@ class Commands(BaseCommands):
         self.notify(users, Message("QUIT", reason, prefix=user.prefix), user)
 
     def nick(self, sock, source, nick):
-        user = User.objects(sock=sock).first()
+        user = User.objects.filter(sock=sock).first()
 
         if User.objects.filter(nick=nick):
             return ERR_NICKNAMEINUSE(nick)
@@ -62,11 +62,14 @@ class Commands(BaseCommands):
         self.notify(users, Message("NICK", nick, prefix=prefix))
 
     def user(self, sock, source, username, hostname, server, realname):
-        _user = User.objects(sock=sock).first()
+        _user = User.objects.filter(sock=sock).first()
 
-        _user.userinfo = UserInfo(
+        userinfo = UserInfo(
             user=username, host=hostname, name=realname, server=server
         )
+        userinfo.save()
+        _user.userinfo = userinfo
+        _user.userinfo.save()
 
         _user.save()
 
