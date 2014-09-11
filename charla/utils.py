@@ -16,5 +16,7 @@ def anyof(obj, *types):
 
 def waitfor(address, port, timeout=10):
     sock = socket(AF_INET, SOCK_STREAM)
-    while not sock.connect_ex((address, port)) == 0 and timeout:
+    counter = timeout
+    while not sock.connect_ex((address, port)) == 0 and counter:
         sleep(1)
+        counter -= 1
