@@ -1,7 +1,7 @@
 .. _Python: http://python.org/
 .. _circuits: http://circuitsframework.org/
-.. _Docker: http://docker.com/
-.. _fig: http://fig.sh/
+.. _Docker: https://www.docker.com/
+.. _Docker Compose: https://github.com/docker/compose
 
 
 charla
@@ -17,15 +17,17 @@ Installation and Usage
 
 From Source::
     
-    $ hg clone https://bitbucket.org/circuits/charla
+    $ git clone https://github.com/prologic/charla.git
     $ cd charla
-    $ ./server.py
+    $ pip install -r requirements.txt
+    $ python setup.py develop
+    $ charla
 
-From Source using `fig`_ and `Docker`_::
+From Source using `Docker Compose`_ and `Docker`_::
     
-    $ hg clone https://bitbucket.org/circuits/charla
+    $ git clone https://github.com/prologic/charla.git
     $ cd charla
-    $ fig up
+    $ docker-compose up
 
 Using `Docker`_::
     

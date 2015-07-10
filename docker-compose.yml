@@ -4,7 +4,6 @@ redis:
 charla:
     build: .
     links:
-      - redis:redis
+      - redis
     ports:
       - "6667:6667"
-    command: --debug

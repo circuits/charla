@@ -1,24 +1,26 @@
 charla
 ======
 
-charla is [Spanish for chat][] and is an IRC Server and Daemon written in [Python][] using the [circuits][] Application Framework.
+charla is [Spanish for chat](http://www.spanishcentral.com/translate/charla) and is an IRC Server and Daemon written in [Python](http://python.org/) using the [circuits](http://circuitsframework.org/) Application Framework.
 
 Installation and Usage
 ----------------------
 
 From Source:
 
-    $ hg clone https://bitbucket.org/circuits/charla
+    $ git clone https://github.com/prologic/charla.git
     $ cd charla
-    $ ./server.py
+    $ pip install -r requirements.txt
+    $ python setup.py develop
+    $ charla
 
-From Source using [fig][] and [Docker][]:
+From Source using [Docker Compose](https://github.com/docker/compose) and [Docker](https://www.docker.com/):
 
-    $ hg clone https://bitbucket.org/circuits/charla
+    $ git clone https://github.com/prologic/charla.git
     $ cd charla
-    $ fig up
+    $ docker-compose up
 
-Using [Docker][]:
+Using [Docker](https://www.docker.com/):
 
     $ docker run -d 6667:6667 prologic/charla
 
@@ -26,9 +28,3 @@ From PyPi (*ccoming soon*):
 
     $ pip install charla
     $ charla
-
-  [Spanish for chat]: http://www.spanishcentral.com/translate/charla
-  [Python]: http://python.org/
-  [circuits]: http://circuitsframework.org/
-  [fig]: http://fig.sh/
-  [Docker]: http://docker.com/
