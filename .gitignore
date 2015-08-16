@@ -1,7 +1,8 @@
 *~
 tmp
-*.pyc
+.env
 .cache
+*.py[co]
 coverage
 .coverage
 *.egg-info
