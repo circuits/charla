@@ -22,7 +22,7 @@ From Source using [Docker Compose](https://github.com/docker/compose) and [Docke
 
 Using [Docker](https://www.docker.com/):
 
-    $ docker run -d 6667:6667 prologic/charla
+    $ docker run -d 7000:7000 prologic/charla
 
 From PyPi (*ccoming soon*):
 

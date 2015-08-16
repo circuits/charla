@@ -31,7 +31,7 @@ From Source using `Docker Compose`_ and `Docker`_::
 
 Using `Docker`_::
     
-    $ docker run -d 6667:6667 prologic/charla
+    $ docker run -d 7000:7000 prologic/charla
 
 From PyPi (*ccoming soon*)::
     
