@@ -1,6 +1,7 @@
 *~
 tmp
 .env
+.eggs
 .cache
 *.py[co]
 coverage
@@ -8,3 +9,4 @@ coverage
 *.egg-info
 docs/build
 __pycache__
+*/version.py
