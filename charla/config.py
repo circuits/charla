@@ -115,7 +115,7 @@ class Config(reprconf.Config):
         add(
             "-b", "--bind",
             action="store", type=str,
-            default="0.0.0.0:6667", dest="bind",
+            default="0.0.0.0:7000", dest="bind",
             help="Bind to address:[port]"
         )
 
