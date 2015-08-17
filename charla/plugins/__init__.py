@@ -22,7 +22,7 @@ from cidict import cidict
 from ..plugin import BasePlugin
 
 
-DEFAULTS = ["autojoin", "core", "message", "channel", "user", "mode", "ping", "welcome"]
+DEFAULTS = ["autojoin", "core", "channel", "checkhost", "hello", "message", "mode", "user", "ping", "welcome"]
 
 
 class load(Event):

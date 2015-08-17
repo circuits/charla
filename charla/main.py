@@ -77,7 +77,6 @@ def main():
     manager = Manager()
 
     Worker(channel="threadpool").register(manager)
-    Worker(channel="processpool").register(manager)
 
     if config["debug"]:
         Debugger(

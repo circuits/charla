@@ -52,13 +52,19 @@ class Commands(BaseCommands):
     def user(self, sock, source, username, hostname, server, realname):
         _user = User.objects.filter(sock=sock).first()
 
-        userinfo = UserInfo(
-            user=username, host=hostname, name=realname, server=server
-        )
-        userinfo.save()
-        _user.userinfo = userinfo
-        _user.userinfo.save()
+        if _user.userinfo is None:
+            userinfo = UserInfo(
+                user=username, host=hostname, name=realname, server=server
+            )
+        else:
+            userinfo = _user.userinfo
+            userinfo.user = username
+            userinfo.name = realname
+            userinfo.server = server
 
+        userinfo.save()
+
+        _user.userinfo = userinfo
         _user.save()
 
         if not _user.registered and _user.nick:
