@@ -1,8 +1,3 @@
-# Module:   models
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
 """Data Models"""
 
 
@@ -80,7 +75,14 @@ class User(Model):
         userinfo = self.userinfo
         if userinfo is None:
             return
-        return joinprefix(self.nick, userinfo.user, userinfo.host)
+        return joinprefix(*self.source)
+
+    @property
+    def source(self):
+        userinfo = self.userinfo
+        if userinfo is None:
+            return
+        return self.nick, userinfo.user, userinfo.host
 
     class Meta:
         indices = ("id", "sock", "nick",)

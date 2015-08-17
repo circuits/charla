@@ -1,8 +1,3 @@
-# Module:   server
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
 """Server Module
 
 Main Listening Server Component
@@ -23,10 +18,7 @@ from circuits.net.sockets import TCPServer
 
 from circuits.protocols.irc import reply, response, IRC, Message
 
-from circuits.protocols.irc.replies import (
-    ERR_NOMOTD, ERR_UNKNOWNCOMMAND,
-    RPL_WELCOME, RPL_YOURHOST,
-)
+from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
 
 
 from .utils import anyof
@@ -173,14 +165,6 @@ class Server(Component):
                 continue
 
             self.fire(reply(user.sock, message))
-
-    def signon(self, sock, source):
-        self.fire(reply(sock, RPL_WELCOME(self.network)))
-        self.fire(reply(sock, RPL_YOURHOST(self.host, self.version)))
-        self.fire(reply(sock, ERR_NOMOTD()))
-
-        # Force users to join #circuits
-        self.fire(response.create("join", sock, source, "#circuits"))
 
     def reply(self, sock, message):
         user = User.objects.filter(sock=sock).first()

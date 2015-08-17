@@ -21,6 +21,7 @@ user.save()
 channel = Channel(name="#foo")
 channel.save()
 
+
 channel.users.append(user)
 channel.save()
 

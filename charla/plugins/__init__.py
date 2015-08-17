@@ -1,8 +1,3 @@
-# Package:  plugins
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
 """Plugins Package"""
 
 
@@ -27,7 +22,7 @@ from cidict import cidict
 from ..plugin import BasePlugin
 
 
-DEFAULTS = ["core", "message", "channel", "user", "mode", "misc"]
+DEFAULTS = ["autojoin", "core", "message", "channel", "user", "mode", "ping", "welcome"]
 
 
 class load(Event):
@@ -74,9 +69,9 @@ class Plugins(Component):
 
             m = safe__import__(name, globals(), locals(), package)
 
-            p1 = lambda x: isclass(x) and issubclass(x, BasePlugin)
-            p2 = lambda x: x is not BasePlugin
-            predicate = lambda x: p1(x) and p2(x)
+            p1 = lambda x: isclass(x) and issubclass(x, BasePlugin)  # noqa
+            p2 = lambda x: x is not BasePlugin  # noqa
+            predicate = lambda x: p1(x) and p2(x)  # noqa
             plugins = getmembers(m, predicate)
 
             for name, Plugin in plugins:

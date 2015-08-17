@@ -1,20 +1,5 @@
-# Plugin:   channel
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
-"""Channel Plugin"""
-
-
-__version__ = "0.0.1"
-__author__ = "James Mills, prologic at shortcircuit dot net dot au"
-
-
 from circuits.protocols.irc import Message
-
-from circuits.protocols.irc.replies import (
-    RPL_NOTOPIC, RPL_NAMEREPLY, RPL_ENDOFNAMES,
-)
+from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_NAMEREPLY, RPL_ENDOFNAMES
 
 
 from ..plugin import BasePlugin
@@ -81,6 +66,9 @@ class Commands(BaseCommands):
 
 class ChannelPlugin(BasePlugin):
     """Channel Plugin"""
+
+    __version__ = "0.0.1"
+    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(ChannelPlugin, self).init(*args, **kwargs)

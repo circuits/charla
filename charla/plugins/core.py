@@ -1,15 +1,3 @@
-# Plugin:   core
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
-"""Core Plugin"""
-
-
-__version__ = "0.0.1"
-__author__ = "James Mills, prologic at shortcircuit dot net dot au"
-
-
 from itertools import chain
 from operator import attrgetter
 
@@ -55,7 +43,7 @@ class Commands(BaseCommands):
         if not user.registered and user.userinfo:
             user.registered = True
             user.save()
-            return signon(sock, source)
+            return signon(sock, user.source)
 
         users = chain(*map(attrgetter("users"), user.channels))
 
@@ -76,11 +64,14 @@ class Commands(BaseCommands):
         if not _user.registered and _user.nick:
             _user.registered = True
             _user.save()
-            return signon(sock, source)
+            return signon(sock, _user.source)
 
 
 class CorePlugin(BasePlugin):
     """Core Plugin"""
+
+    __version__ = "0.0.1"
+    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(CorePlugin, self).init(*args, **kwargs)

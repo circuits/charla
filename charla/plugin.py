@@ -10,10 +10,10 @@ should subclass BasePlugin to be properly registered as plugins.
 """
 
 
-from circuits import BaseComponent
+from circuits import Component
 
 
-class BasePlugin(BaseComponent):
+class BasePlugin(Component):
 
     channel = "server"
 
