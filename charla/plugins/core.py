@@ -40,7 +40,7 @@ class Commands(BaseCommands):
         user.nick = nick
         user.save()
 
-        if not user.registered and user.userinfo:
+        if not user.registered and user.userinfo is not None:
             user.registered = True
             user.save()
             return signon(sock, user.source)
