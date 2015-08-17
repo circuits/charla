@@ -1,15 +1,3 @@
-# Plugin:   message
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-
-
-"""Message Plugin"""
-
-
-__version__ = "0.0.1"
-__author__ = "James Mills, prologic at shortcircuit dot net dot au"
-
-
 from circuits import handler
 
 from circuits.protocols.irc import joinprefix, reply, Message
@@ -41,14 +29,14 @@ class Commands(BaseCommands):
                 user
             )
         else:
-            user = User.objects.filter(nick=target)
+            user = User.objects.filter(nick=target).first()
             if user is None:
                 return ERR_NOSUCHNICK(target)
 
             return reply(
                 user.sock,
                 Message(
-                    event.name.uppwer(), target, message,
+                    event.name.upper(), target, message,
                     prefix=prefix
                 )
             )
@@ -56,6 +44,9 @@ class Commands(BaseCommands):
 
 class MessagePlugin(BasePlugin):
     """Message Plugin"""
+
+    __version__ = "0.0.1"
+    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(MessagePlugin, self).init(*args, **kwargs)
