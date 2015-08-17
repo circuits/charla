@@ -7,17 +7,17 @@ from ..commands import BaseCommands
 
 class Commands(BaseCommands):
 
-    def hello(self, sock, source, server):
-        return Message("PONG", server)
+    def hello(self, sock, source):
+        return Message("NOTICE", "*", "Hello!")
 
 
-class MiscPlugin(BasePlugin):
-    """Misc Plugin"""
+class HelloPlugin(BasePlugin):
+    """Hello Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(MiscPlugin, self).init(*args, **kwargs)
+        super(HelloPlugin, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)
