@@ -4,6 +4,7 @@ Main Listening Server Component
 """
 
 
+from socket import has_ipv6
 from logging import getLogger
 from types import GeneratorType
 from collections import defaultdict
@@ -14,7 +15,7 @@ from cidict import cidict
 from circuits import handler, Component, Event
 
 from circuits.net.events import write
-from circuits.net.sockets import TCPServer
+from circuits.net.sockets import TCPServer, TCP6Server
 
 from circuits.protocols.irc import reply, response, IRC, Message
 
@@ -52,15 +53,18 @@ class Server(Component):
 
         self.buffers = defaultdict(bytes)
 
-        if ":" in config["bind"]:
-            address, port = config["bind"].split(":")
-            port = int(port)
+        port = config["port"]
+
+        if has_ipv6:
+            address = "::"
+            Transport = TCP6Server
         else:
-            address, port = config["bind"], 6667
+            address = "0.0.0.0"
+            Transport = TCPServer
 
         bind = (address, port)
 
-        self.transport = TCPServer(
+        self.transport = Transport(
             bind,
             channel=self.channel
         ).register(self)
@@ -109,7 +113,8 @@ class Server(Component):
             )
         )
 
-    def connect(self, sock, host, port):
+    def connect(self, sock, *args):
+        host, port = args[:2]
         user = User(sock=sock, host=host, port=port)
         user.save()
 

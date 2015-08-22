@@ -1,4 +1,4 @@
-from socket import gethostbyaddr
+from socket import getaddrinfo, gethostbyaddr, AF_INET6
 
 
 from circuits import handler, task
@@ -11,7 +11,9 @@ from ..models import User, UserInfo
 
 
 def check_host(sock):
-    host, _ = sock.getpeername()
+    host = sock.getpeername()[0]
+    if ":" in host:
+        return getaddrinfo(host, None, AF_INET6)[0][-1][0]
     return gethostbyaddr(host)[0]
 
 
@@ -47,7 +49,8 @@ class CheckHostPlugin(BasePlugin):
         if user.registered:
             return signon(sock, user.source)
 
-    def connect(self, sock, host, port):
+    def connect(self, sock, *args):
+        host, port = args[:2]
         self.pending[sock] = True
         self.fire(reply(sock, Message("NOTICE", "*", "*** Looking up your hostname...")))
 

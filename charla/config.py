@@ -1,11 +1,3 @@
-# Module:   config
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-#
-# Borrowed from sahriswiki (https://sahriswiki.org/)
-# with permission from James Mills, prologic at shortcircuit dot net dot au
-
-
 """Configuration Handling
 
 Supports configuration of options via the command-line
@@ -113,10 +105,10 @@ class Config(reprconf.Config):
         )
 
         add(
-            "-b", "--bind",
-            action="store", type=str,
-            default="0.0.0.0:7000", dest="bind",
-            help="Bind to address:[port]"
+            "-P", "--port",
+            action="store", type=int,
+            default=7000, dest="port",
+            help="Port to listen to"
         )
 
         namespace = parser.parse_args()
