@@ -119,7 +119,7 @@ class Server(Component):
     def ready(self, server, bind):
         self.logger.info(
             "{0} v{1} ready! Listening on: {1}\n".format(
-                self.name, self.version, "{s}:{1}".format(*bind)
+                self.name, self.version, "{0}:{1}".format(*bind)
             )
         )
 
