@@ -4,6 +4,7 @@ Main Listening Server Component
 """
 
 
+from datetime import datetime
 from socket import has_ipv6
 from logging import getLogger
 from types import GeneratorType
@@ -34,6 +35,13 @@ class Server(Component):
 
     network = "Test"
     host = "localhost"
+    created = datetime.utcnow()
+
+    features = (
+        "PREFIX=(ov)@+",
+        "CHANTYPES=#&",
+    )
+
     version = "ircd v{0:s}".format(version)
 
     def init(self, config, db):

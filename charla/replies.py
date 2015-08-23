@@ -12,6 +12,14 @@ def MODE(target, modes, prefix=None):
     return Message("MODE", target, modes, prefix=prefix)
 
 
+def RPL_CREATED(date):
+    return _M("003", "This server was created {0}".format(date))
+
+
+def RPL_ISUPPORT(features):
+    return _M("005", *(features + ("are supported by this server",)))
+
+
 def RPL_UMODEIS(modes):
     return _M("221", modes)
 
