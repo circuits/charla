@@ -1,11 +1,12 @@
 from circuits.protocols.irc import Message
-from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_NAMEREPLY, RPL_ENDOFNAMES
 
 
 from ..plugin import BasePlugin
-from ..replies import MODE, JOIN
 from ..models import Channel, User
 from ..commands import BaseCommands
+from ..replies import MODE, JOIN, TOPIC
+from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES
+from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
 
 
 class Commands(BaseCommands):
@@ -69,6 +70,24 @@ class Commands(BaseCommands):
 
         if not channel.users:
             channel.delete()
+
+    def topic(self, sock, source, name, topic=None):
+        user = User.objects.filter(sock=sock).first()
+
+        channel = Channel.objects.filter(name=name).first()
+        if channel is None:
+            return ERR_NOSUCHCHANNEL(name)
+
+        if topic is None and not channel.topic:
+            return RPL_NOTOPIC(channel.name)
+
+        if topic is None:
+            return RPL_TOPIC(channel.name, channel.topic)
+
+        channel.topic = topic
+        channel.save()
+
+        self.notify(channel.users[:], TOPIC(channel.name, topic, prefix=user.prefix))
 
 
 class ChannelPlugin(BasePlugin):

@@ -102,6 +102,7 @@ class Channel(Model):
     name = Attribute(required=True, unique=True)
     users = ListField("User")
     modes = Attribute(default=None)
+    topic = Attribute(default=None)
     operators = ListField("User")
     voiced = ListField("User")
 

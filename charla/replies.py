@@ -18,6 +18,10 @@ def JOIN(name, prefix=None):
     return Message("JOIN", name, prefix=prefix)
 
 
+def TOPIC(channel, topic, prefix=None):
+    return Message("TOPIC", channel, topic, prefix=prefix)
+
+
 def RPL_CREATED(date):
     return _M("003", "This server was created {0}".format(date))
 
@@ -38,6 +42,10 @@ def RPL_CHANNELMODEIS(channel, mode, params=None):
 
 def RPL_VERSION(name, version, hostname, url):
     return _M("351", name, version, hostname, url)
+
+
+def RPL_TOPIC(channel, topic):
+    return _M("332", channel, topic)
 
 
 def ERR_USERNOTINCHANNEL(nick, channel):
