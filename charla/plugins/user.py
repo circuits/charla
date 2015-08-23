@@ -34,7 +34,7 @@ class Commands(BaseCommands):
                 for user in channel.users
             ] + [RPL_ENDOFWHO(mask)]
         else:
-            user = User.objects.filter(nick=mask)
+            user = User.objects.filter(nick=mask).first()
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 
