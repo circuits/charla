@@ -10,10 +10,8 @@ from bidict import bidict
 from circuits.protocols.irc import joinprefix
 
 from redisco.models import Model
-from redisco.models import (
-    Attribute, BooleanField, DateTimeField,
-    IntegerField, ListField, ReferenceField
-)
+from redisco.models import Attribute, BooleanField, DateTimeField
+from redisco.models import IntegerField, ListField, ReferenceField
 
 
 class SocketField(Attribute):
@@ -53,8 +51,8 @@ class User(Model):
     port = IntegerField(default=0)
 
     nick = Attribute(default=None)
-    modes = Attribute(default=None)
     away = Attribute(default=None)
+    modes = Attribute(default="")
 
     channels = ListField("Channel")
     userinfo = ReferenceField("UserInfo")
@@ -103,6 +101,9 @@ class Channel(Model):
 
     name = Attribute(required=True, unique=True)
     users = ListField("User")
+    modes = Attribute(default=None)
+    operators = ListField("User")
+    voiced = ListField("User")
 
     def __repr__(self):
         attrs = self.attributes_dict.copy()
@@ -112,6 +113,17 @@ class Channel(Model):
             return "<%s %s>" % (self.key(), attrs)
 
         return "<%s %s>" % (self.__class__.__name__, attrs)
+
+    @property
+    def userprefixes(self):
+        def prefix(user):
+            if user in self.operators:
+                return "@{0}".format(user.nick)
+            if user in self.voiced:
+                return "+{0}".format(user.nick)
+            return user.nick
+
+        return map(prefix, sorted(self.users, key=prefix))
 
     class Meta:
         indices = ("id", "name",)

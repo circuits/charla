@@ -1,6 +1,7 @@
+redis
+funcy
 cidict
 bidict
-redis
 pymills
 hiredis
 attrdict

@@ -1,11 +1,129 @@
+from itertools import imap
+from operator import attrgetter
+
+
+from funcy import take
+
+
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
-from ..replies import MODE, RPL_UMODEIS
+from ..replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS
 from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
+from ..replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
+
+
+def process_channel_mode_o(user, channel, mode, *args, **kwargs):
+    op = kwargs.get("op", None)
+
+    if op == "+":
+        nick = args[0]
+        if nick not in imap(attrgetter("nick"), channel.users):
+            yield False, ERR_USERNOTINCHANNEL(nick, channel.name)
+            return
+
+        nick = User.objects.filter(nick=nick).first()
+        channel.operators.append(nick)
+        channel.save()
+
+        yield True, MODE(channel.name, "+o", [nick.nick], prefix=user.prefix)
+    elif op == "-":
+        nick = args[0]
+        if nick not in imap(attrgetter("nick"), channel.users):
+            yield False, ERR_USERNOTINCHANNEL(nick, channel.name)
+            return
+
+        nick = User.objects.filter(nick=nick).first()
+        channel.operators.remove(nick)
+        channel.save()
+
+        yield True, MODE(channel.name, "-o", [nick.nick], prefix=user.prefix)
+
+
+channel_modes = {
+    "o": (1, process_channel_mode_o),
+}
+
+
+def process_channel_modes(user, channel, modes):
+    if user not in channel.operators:
+        yield False, ERR_CHANOPRIVSNEEDED(channel.name)
+        return
+
+    op = None
+    modes = iter(modes)
+    while True:
+        try:
+            mode = next(modes)
+
+            if mode and mode[0] == "+":
+                op = "+"
+                mode = mode[1:]
+            elif mode and mode[0] == "-":
+                op = "-"
+                mode = mode[1:]
+
+            if mode not in channel_modes:
+                yield False, ERR_UNKNOWNMODE(mode)
+            else:
+                nargs, f = channel_modes[mode]
+                for notify, message in f(user, channel, mode, *take(nargs, modes), op=op):
+                    yield notify, message
+        except StopIteration:
+            break
+
+
+def process_user_mode(user, mode, op=None):
+    if op == "+":
+        if mode in user.modes:
+            return
+        user.modes += mode
+    else:
+        if mode not in user.modes:
+            return
+        user.modes = user.modes.replace(mode, "")
+
+    user.save()
+
+    return MODE(user.nick, "{0}{1}".format(op, mode), prefix=user.nick)
+
+
+user_modes = {
+    "i": (0, process_user_mode),
+}
+
+
+def process_user_modes(user, modes):
+    op = None
+    modes = iter(modes)
+    while True:
+        try:
+            mode = next(modes)
+
+            if mode and mode[0] == "+":
+                op = "+"
+                mode = mode[1:]
+            elif mode and mode[0] == "-":
+                op = "-"
+                mode = mode[1:]
+
+            if mode not in user_modes:
+                yield ERR_UNKNOWNMODE(mode)
+            else:
+                nargs, f = user_modes[mode]
+                yield f(user, mode, op=op)
+        except StopIteration:
+            break
 
 
 class Commands(BaseCommands):
+
+    def _process_channel_modes(self, user, channel, modes):
+        for notify, message in process_channel_modes(user, channel, modes):
+            if notify:
+                self.notify(channel.users[:], message)
+            else:
+                yield message
 
     def mode(self, sock, source, *args):
         """MODE command
@@ -25,22 +143,23 @@ class Commands(BaseCommands):
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
 
-            # TODO: Return or Modify Channel Modes
+            user = User.objects.filter(sock=sock).first()
+
+            mode = next(args, None)
+            if mode is None:
+                return RPL_CHANNELMODEIS(channel.name, "+{0}".format(channel.modes))
+
+            return self._process_channel_modes(user, channel, [mode] + list(args))
         else:
             user = User.objects.filter(nick=mask).first()
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 
-            modes = next(args, None)
-            if modes is None:
-                return RPL_UMODEIS(user.modes)
+            mode = next(args, None)
+            if mode is None:
+                return RPL_UMODEIS("+{0}".format(user.modes))
 
-            # TODO: Return ERR_UNKNOWNMODE for unsupported modes
-
-            user.modes = modes
-            user.save()
-
-            return MODE(user.nick, modes, prefix=user.nick)
+            return process_user_modes(user, [mode] + list(args))
 
 
 class ModePlugin(BasePlugin):

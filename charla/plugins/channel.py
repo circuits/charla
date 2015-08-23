@@ -3,6 +3,7 @@ from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_NAMEREPLY, RPL_ENDOF
 
 
 from ..plugin import BasePlugin
+from ..replies import MODE, JOIN
 from ..models import Channel, User
 from ..commands import BaseCommands
 
@@ -11,6 +12,8 @@ class Commands(BaseCommands):
 
     def join(self, sock, source, name):
         user = User.objects.filter(sock=sock).first()
+
+        replies = [JOIN(name, prefix=user.prefix)]
 
         channel = Channel.objects.filter(name=name).first()
         if channel is None:
@@ -22,21 +25,25 @@ class Commands(BaseCommands):
 
         self.notify(
             channel.users[:],
-            Message("JOIN", name, prefix=user.prefix)
+            JOIN(name, prefix=user.prefix)
         )
 
         user.channels.append(channel)
         user.save()
 
+        if not channel.users:
+            replies.append(MODE(name, "+o {0}".format(user.nick), prefix=self.server.host))
+            channel.operators.append(user)
+            channel.save()
+
         channel.users.append(user)
         channel.save()
 
-        return (
-            Message("JOIN", name, prefix=user.prefix),
-            RPL_NOTOPIC(name),
-            RPL_NAMEREPLY(channel),
-            RPL_ENDOFNAMES()
-        )
+        replies.append(RPL_NOTOPIC(name))
+        replies.append(RPL_NAMEREPLY(channel.name, channel.userprefixes))
+        replies.append(RPL_ENDOFNAMES())
+
+        return replies
 
     def part(self, sock, source, name, reason="Leaving"):
         user = User.objects.filter(sock=sock).first()
