@@ -13,35 +13,36 @@ from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
 from ..replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
 
 
-def process_channel_mode_o(user, channel, mode, *args, **kwargs):
+def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
     op = kwargs.get("op", None)
 
+    nick = args[0]
+    if nick not in imap(attrgetter("nick"), channel.users):
+        yield False, ERR_USERNOTINCHANNEL(nick, channel.name)
+        return
+
+    nick = User.objects.filter(nick=nick).first()
+
+    if mode == "o":
+        collection = channel.operators
+    elif mode == "v":
+        collection = channel.voiced
+
     if op == "+":
-        nick = args[0]
-        if nick not in imap(attrgetter("nick"), channel.users):
-            yield False, ERR_USERNOTINCHANNEL(nick, channel.name)
-            return
-
-        nick = User.objects.filter(nick=nick).first()
-        channel.operators.append(nick)
+        collection.append(nick)
         channel.save()
 
-        yield True, MODE(channel.name, "+o", [nick.nick], prefix=user.prefix)
+        yield True, MODE(channel.name, "{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
     elif op == "-":
-        nick = args[0]
-        if nick not in imap(attrgetter("nick"), channel.users):
-            yield False, ERR_USERNOTINCHANNEL(nick, channel.name)
-            return
-
-        nick = User.objects.filter(nick=nick).first()
-        channel.operators.remove(nick)
+        collection.remove(nick)
         channel.save()
 
-        yield True, MODE(channel.name, "-o", [nick.nick], prefix=user.prefix)
+        yield True, MODE(channel.name, "{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
 
 
 channel_modes = {
-    "o": (1, process_channel_mode_o),
+    "o": (1, process_channel_mode_ov),
+    "v": (1, process_channel_mode_ov),
 }
 
 
