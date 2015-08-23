@@ -24,5 +24,9 @@ def RPL_UMODEIS(modes):
     return _M("221", modes)
 
 
+def RPL_VERSION(name, version, hostname, url):
+    return _M("351", name, version, hostname, url)
+
+
 def ERR_NEEDMOREPARAMS(command):
     return _M("461", command, "Need more parameters")

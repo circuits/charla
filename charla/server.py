@@ -25,8 +25,8 @@ from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
 
 from .utils import anyof
 from .models import User
-from .version import version
 from .plugin import BasePlugin
+from . import __name__, __url__, __version__
 
 
 class Server(Component):
@@ -42,7 +42,9 @@ class Server(Component):
         "CHANTYPES=#&",
     )
 
-    version = "ircd v{0:s}".format(version)
+    url = __url__
+    name = __name__
+    version = __version__
 
     def init(self, config, db):
         self.config = config
@@ -116,8 +118,8 @@ class Server(Component):
 
     def ready(self, server, bind):
         self.logger.info(
-            "ircd v{0:s} ready! Listening on: {1:s}\n".format(
-                version, "{0:s}:{1:d}".format(*bind)
+            "{0} v{1} ready! Listening on: {1}\n".format(
+                self.name, self.version, "{s}:{1}".format(*bind)
             )
         )
 
