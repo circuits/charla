@@ -1,6 +1,7 @@
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
+from ..replies import MODE, RPL_UMODEIS
 from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
 
 
@@ -30,7 +31,16 @@ class Commands(BaseCommands):
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 
-            # TODO: Return or Modify User Modes
+            modes = next(args, None)
+            if modes is None:
+                return RPL_UMODEIS(user.modes)
+
+            # TODO: Return ERR_UNKNOWNMODE for unsupported modes
+
+            user.modes = modes
+            user.save()
+
+            return MODE(user.nick, modes, prefix=user.nick)
 
 
 class ModePlugin(BasePlugin):

@@ -53,6 +53,7 @@ class User(Model):
     port = IntegerField(default=0)
 
     nick = Attribute(default=None)
+    modes = Attribute(default=None)
     away = Attribute(default=None)
 
     channels = ListField("Channel")
@@ -65,10 +66,9 @@ class User(Model):
         attrs = self.attributes_dict.copy()
         attrs["channels"] = map(attrgetter("name"), attrs["channels"])
 
-        if not self.is_new():
-            return "<%s %s>" % (self.key(), attrs)
+        key = self.__class__.__name__ if self.is_new() else self.key()
 
-        return "<%s %s>" % (self.__class__.__name__, attrs)
+        return "<{0} {1}>".format(key, attrs)
 
     @property
     def prefix(self):
