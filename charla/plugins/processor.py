@@ -1,3 +1,4 @@
+from inspect import getargspec
 from types import GeneratorType
 
 
@@ -15,6 +16,7 @@ from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
 from ..utils import anyof
 from ..models import User
 from ..plugin import BasePlugin
+from ..replies import ERR_NEEDMOREPARAMS
 
 
 class ProcessorPlugin(BasePlugin):
@@ -132,6 +134,12 @@ class ProcessorPlugin(BasePlugin):
             if event.name not in self.command:
                 event.stop()
                 return self.fire(reply(sock, ERR_UNKNOWNCOMMAND(event.name)))
+
+            f = getattr(self.command[event.name], event.name)
+            argspec = getargspec(f)
+            if len(args) < (len(argspec.args) - len(argspec.defaults or ()) - 1):
+                event.stop()
+                return self.fire(reply(sock, ERR_NEEDMOREPARAMS(event.name)))
 
             event.complete = True
             event.complete_channels = ("server",)
