@@ -135,9 +135,18 @@ class ProcessorPlugin(BasePlugin):
                 event.stop()
                 return self.fire(reply(sock, ERR_UNKNOWNCOMMAND(event.name)))
 
-            f = getattr(self.command[event.name], event.name)
-            argspec = getargspec(f)
-            if len(args) < (len(argspec.args) - len(argspec.defaults or ()) - 1):
+            component = self.command[event.name]
+            handlers = (x for x in type(component).handlers() if event.name in x.names)
+            handler = next(handlers, None)
+            assert handler is not None
+
+            argspec = getargspec(handler)
+            args = list(argspec.args)
+            for skip in ("self", "event",):
+                if args and args[0] == skip:
+                    del args[0]
+
+            if len(args) < (len(args) - len(argspec.defaults or ())):
                 event.stop()
                 return self.fire(reply(sock, ERR_NEEDMOREPARAMS(event.name)))
 
