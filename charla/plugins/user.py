@@ -21,6 +21,7 @@ class Commands(BaseCommands):
             return ERR_NOSUCHNICK(mask)
 
         userinfo = user.userinfo
+        server = self.parent.server
 
         channels = []
         for channel in user.channels:
@@ -31,10 +32,14 @@ class Commands(BaseCommands):
                 prefix += "+"
             channels.append(u"{0}{1}".format(prefix, channel.name))
 
+        # Force :<channels>
+        if len(channels) == 1:
+            channels.append("")
+
         return [
             RPL_WHOISUSER(user.nick, userinfo.user, userinfo.host, userinfo.name),
             RPL_WHOISCHANNELS(user.nick, channels),
-            RPL_WHOISSERVER(user.nick, userinfo.server, "# XXX: TBD"),
+            RPL_WHOISSERVER(user.nick, server.host, server.info),
             RPL_ENDOFWHOIS(user.nick),
         ]
 

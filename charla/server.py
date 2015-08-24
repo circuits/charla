@@ -25,8 +25,9 @@ class Server(Component):
 
     channel = "server"
 
-    network = u"Test"
-    host = u"localhost"
+    info = u"QLD, Australia"
+    network = u"ShortCircuit"
+    host = u"daisy.shortcircuit.net.au"
     created = datetime.utcnow()
 
     url = unicode(__url__)
