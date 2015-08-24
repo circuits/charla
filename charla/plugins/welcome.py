@@ -27,4 +27,5 @@ class Welcome(BasePlugin):
         result = yield self.call(supports())
         self.fire(reply(sock, RPL_ISUPPORT(tuple(chain(*result.value)))))
 
-        self.fire(reply(sock, ERR_NOMOTD()))
+        if not self.server.motd.exists():
+            self.fire(reply(sock, ERR_NOMOTD()))

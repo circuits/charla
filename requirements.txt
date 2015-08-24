@@ -4,6 +4,7 @@ cidict
 bidict
 pymills
 hiredis
+pathlib
 attrdict
 
 # redisco

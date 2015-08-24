@@ -1,12 +1,25 @@
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import ERR_NONICKNAMEGIVEN
+from ..replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD
+from ..replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
 from ..replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
 from ..replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
 
 
 class Commands(BaseCommands):
+
+    def motd(self, sock, source):
+        if not self.server.motd.exists():
+            yield ERR_NOMOTD()
+            return
+
+        yield RPL_MOTDSTART(self.server.host)
+
+        with self.server.motd.open("rb") as f:
+            yield RPL_MOTD(f.readline().strip())
+
+        yield RPL_ENDOFMOTD()
 
     def whois(self, sock, source, *args):
         if not args:

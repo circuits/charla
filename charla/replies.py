@@ -92,3 +92,15 @@ def RPL_WHOISSERVER(nick, server, server_info):
 
 def RPL_ENDOFWHOIS(nick):
     return _M(u"318", nick, u"End of WHOIS list")
+
+
+def RPL_MOTDSTART(server):
+    return _M(u"375", u"- {0} Message of the day -".format(server))
+
+
+def RPL_MOTD(text):
+    return _M(u"372", u"- {0}".format(text))
+
+
+def RPL_ENDOFMOTD():
+    return _M(u"376", u"End of MOTD command")

@@ -16,6 +16,8 @@ from circuits.net.sockets import TCPServer, TCP6Server
 
 from circuits.protocols.irc import response, IRC
 
+from pathlib import Path
+
 
 from .models import User
 from . import __name__, __url__, __version__
@@ -29,6 +31,8 @@ class Server(Component):
     network = u"ShortCircuit"
     host = u"daisy.shortcircuit.net.au"
     created = datetime.utcnow()
+
+    motd = Path("motd.txt")
 
     url = unicode(__url__)
     name = unicode(__name__)
