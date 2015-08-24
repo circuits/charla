@@ -1,3 +1,6 @@
+import re
+
+
 from circuits.protocols.irc import Message
 
 
@@ -9,10 +12,16 @@ from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES
 from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
 
 
+VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")
+
+
 class Commands(BaseCommands):
 
     def join(self, sock, source, name):
         user = models.User.objects.filter(sock=sock).first()
+
+        if VALID_CHANNEL_REGEX.match(name) is None:
+            return ERR_NOSUCHCHANNEL(name)
 
         replies = [JOIN(name, prefix=user.prefix)]
 
