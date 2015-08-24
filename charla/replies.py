@@ -72,3 +72,23 @@ def ERR_ERRONEUSNICKNAME(nick):
 
 def ERR_TOOMANYCHANNELS(channel):
     return _M(u"405", channel, u"You have joined too many channels")
+
+
+def ERR_NONICKNAMEGIVEN():
+    return _M(u"431", "No nickname given")
+
+
+def RPL_WHOISUSER(nick, user, host, realname):
+    return _M(u"311", nick, user, host, u"*", realname)
+
+
+def RPL_WHOISCHANNELS(nick, channels):
+    return _M(u"319", nick, " ".join(channels))
+
+
+def RPL_WHOISSERVER(nick, server, server_info):
+    return _M(u"312", nick, server, server_info)
+
+
+def RPL_ENDOFWHOIS(nick):
+    return _M(u"318", nick, u"End of WHOIS list")
