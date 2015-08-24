@@ -116,6 +116,10 @@ class Channel(Model):
         return "<%s %s>" % (self.__class__.__name__, attrs)
 
     @property
+    def type(self):
+        return self.name[0]
+
+    @property
     def userprefixes(self):
         def prefix(user):
             if user in self.operators:

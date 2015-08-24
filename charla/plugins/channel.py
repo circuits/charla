@@ -9,7 +9,7 @@ from ..plugin import BasePlugin
 from ..commands import BaseCommands
 from ..replies import MODE, JOIN, TOPIC
 from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES
-from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
+from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 
 VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")
@@ -20,7 +20,13 @@ class Commands(BaseCommands):
     def join(self, sock, source, name):
         user = models.User.objects.filter(sock=sock).first()
 
+        if name and name[0] not in self.parent.chantypes:
+            return ERR_NOSUCHCHANNEL(name)
+
         if VALID_CHANNEL_REGEX.match(name) is None:
+            return ERR_NOSUCHCHANNEL(name)
+
+        if len(name) > self.parent.channellen:
             return ERR_NOSUCHCHANNEL(name)
 
         replies = [JOIN(name, prefix=user.prefix)]
@@ -32,6 +38,11 @@ class Commands(BaseCommands):
 
         if user in channel.users:
             return
+
+        type = name[0]
+        nchannels = len([x for x in user.channels if channel.type == type])
+        if nchannels >= self.parent.chanlimit[type]:
+            return ERR_TOOMANYCHANNELS(name)
 
         self.notify(
             channel.users[:],
@@ -104,9 +115,22 @@ class Channel(BasePlugin):
     def init(self, *args, **kwargs):
         super(Channel, self).init(*args, **kwargs)
 
+        self.channellen = 50
+        self.topiclen = 300
+        self.chantypes = "#&"
+
+        self.chanlimit = {
+            u"#": 120,
+        }
+
         self.features = (
-            "PREFIX=(ov)@+",
-            "CHANTYPES=#&",
+            u"PREFIX=(ov)@+",
+            u"CHANTYPES={0}".format(self.chantypes),
+            u"TOPICLEN={0}".format(self.topiclen),
+            u"CHANNELLEN={0}".format(self.channellen),
+            u"CHANLIMIT={0}".format(
+                u",".join(u"{0}:{1}".format(k, v) for k, v in self.chanlimit.items())
+            ),
         )
 
         Commands(*args, **kwargs).register(self)

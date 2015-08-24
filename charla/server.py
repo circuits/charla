@@ -25,16 +25,16 @@ class Server(Component):
 
     channel = "server"
 
-    network = "Test"
-    host = "localhost"
+    network = u"Test"
+    host = u"localhost"
     created = datetime.utcnow()
 
-    url = __url__
-    name = __name__
-    version = __version__
+    url = unicode(__url__)
+    name = unicode(__name__)
+    version = unicode(__version__)
 
     features = (
-        "NETWORK={0}".format(network),
+        u"NETWORK={0}".format(network),
     )
 
     def init(self, config, db):
@@ -69,8 +69,8 @@ class Server(Component):
 
     def ready(self, server, bind):
         self.logger.info(
-            "{0} v{1} ready! Listening on: {1}\n".format(
-                self.name, self.version, "{0}:{1}".format(*bind)
+            u"{0} v{1} ready! Listening on: {1}\n".format(
+                self.name, self.version, u"{0}:{1}".format(*bind)
             )
         )
 

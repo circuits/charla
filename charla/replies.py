@@ -68,3 +68,7 @@ def ERR_UNKNOWNMODE(mode, channel=None):
 
 def ERR_ERRONEUSNICKNAME(nick):
     return _M(u"432", nick, u"Erroneous nickname")
+
+
+def ERR_TOOMANYCHANNELS(channel):
+    return _M(u"405", channel, u"You have joined too many channels")

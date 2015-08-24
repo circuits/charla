@@ -39,6 +39,9 @@ class Commands(BaseCommands):
         if not VALID_NICK_REGEX.match(nick):
             return ERR_ERRONEUSNICKNAME(nick)
 
+        if len(nick) > self.parent.nicklen:
+            return ERR_ERRONEUSNICKNAME(nick)
+
         if User.objects.filter(nick=nick):
             return ERR_NICKNAMEINUSE(nick)
 
@@ -84,4 +87,13 @@ class Core(BasePlugin):
     def init(self, *args, **kwargs):
         super(Core, self).init(*args, **kwargs)
 
+        self.nicklen = 16
+
+        self.features = (
+            "NICKLEN={0}".format(self.nicklen),
+        )
+
         Commands(*args, **kwargs).register(self)
+
+    def supports(self):
+        return self.features
