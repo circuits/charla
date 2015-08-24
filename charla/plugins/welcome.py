@@ -5,7 +5,7 @@ from ..plugin import BasePlugin
 from ..replies import ERR_NOMOTD, RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_ISUPPORT
 
 
-class WelcomePlugin(BasePlugin):
+class Welcome(BasePlugin):
     """Welcome Plugin"""
 
     __version__ = "0.0.1"

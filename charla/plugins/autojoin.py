@@ -1,10 +1,10 @@
-from circuits.protocols.irc import request, response
+from circuits.protocols.irc import response
 
 
 from ..plugin import BasePlugin
 
 
-class AutoJoinPlugin(BasePlugin):
+class AutoJoin(BasePlugin):
     """AutoJoin Plugin"""
 
     __version__ = "0.0.1"

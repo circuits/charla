@@ -13,20 +13,19 @@ from circuits.protocols.irc import reply, response, Message
 from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
 
 
-from ..utils import anyof
 from ..models import User
 from ..plugin import BasePlugin
 from ..replies import ERR_NEEDMOREPARAMS
 
 
-class ProcessorPlugin(BasePlugin):
+class Processor(BasePlugin):
     """Processor Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(ProcessorPlugin, self).init(*args, **kwargs)
+        super(Processor, self).init(*args, **kwargs)
 
         # command -> plugin
         self.command = cidict()
@@ -106,7 +105,7 @@ class ProcessorPlugin(BasePlugin):
                 return
 
             values = (
-                (value,) if not anyof(value, GeneratorType, tuple, list)
+                (value,) if not isinstance(value, (GeneratorType, tuple, list,))
                 else value
             )
 

@@ -163,7 +163,7 @@ class Commands(BaseCommands):
             return process_user_modes(user, [mode] + list(args))
 
 
-class ModePlugin(BasePlugin):
+class Mode(BasePlugin):
     """Mode Plugin
 
     This plugin provides commands and support for User and Channel Modes
@@ -173,6 +173,6 @@ class ModePlugin(BasePlugin):
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(ModePlugin, self).init(*args, **kwargs)
+        super(Mode, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

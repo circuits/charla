@@ -17,14 +17,14 @@ def check_host(sock):
     return gethostbyaddr(host)[0]
 
 
-class CheckHostPlugin(BasePlugin):
+class CheckHost(BasePlugin):
     """Check Host Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(CheckHostPlugin, self).init(*args, **kwargs)
+        super(CheckHost, self).init(*args, **kwargs)
 
         self.pending = {}
 

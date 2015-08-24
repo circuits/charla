@@ -2,14 +2,14 @@ from ..models import User
 from ..plugin import BasePlugin
 
 
-class DebugPlugin(BasePlugin):
-    """DebugHello Plugin"""
+class Debug(BasePlugin):
+    """Debug Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(DebugPlugin, self).init(*args, **kwargs)
+        super(Debug, self).init(*args, **kwargs)
 
     def connect(self, sock, *args):
         host, port = args[:2]

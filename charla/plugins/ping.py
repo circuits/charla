@@ -11,13 +11,13 @@ class Commands(BaseCommands):
         return Message("PONG", server)
 
 
-class PingPlugin(BasePlugin):
+class Ping(BasePlugin):
     """Ping Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(PingPlugin, self).init(*args, **kwargs)
+        super(Ping, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

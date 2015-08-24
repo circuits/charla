@@ -9,13 +9,13 @@ class Commands(BaseCommands):
         return RPL_VERSION(self.server.name, self.server.version, self.server.host, self.server.url)
 
 
-class VersionPlugin(BasePlugin):
+class Version(BasePlugin):
     """VersionHello Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(VersionPlugin, self).init(*args, **kwargs)
+        super(Version, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

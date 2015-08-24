@@ -1,6 +1,7 @@
 from circuits import handler
 
-from circuits.protocols.irc import joinprefix, reply, Message
+from circuits.protocols.irc import joinprefix, reply
+from circuits.protocols.irc import Message as _Message
 
 from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
 
@@ -25,7 +26,7 @@ class Commands(BaseCommands):
 
             self.notify(
                 channel.users,
-                Message("PRIVMSG", target, message, prefix=prefix),
+                _Message("PRIVMSG", target, message, prefix=prefix),
                 user
             )
         else:
@@ -35,20 +36,20 @@ class Commands(BaseCommands):
 
             return reply(
                 user.sock,
-                Message(
+                _Message(
                     event.name.upper(), target, message,
                     prefix=prefix
                 )
             )
 
 
-class MessagePlugin(BasePlugin):
+class Message(BasePlugin):
     """Message Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(MessagePlugin, self).init(*args, **kwargs)
+        super(Message, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

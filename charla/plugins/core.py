@@ -73,13 +73,13 @@ class Commands(BaseCommands):
             return signon(sock, _user.source)
 
 
-class CorePlugin(BasePlugin):
+class Core(BasePlugin):
     """Core Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(CorePlugin, self).init(*args, **kwargs)
+        super(Core, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

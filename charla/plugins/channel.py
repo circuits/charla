@@ -1,8 +1,8 @@
 from circuits.protocols.irc import Message
 
 
+from .. import models
 from ..plugin import BasePlugin
-from ..models import Channel, User
 from ..commands import BaseCommands
 from ..replies import MODE, JOIN, TOPIC
 from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES
@@ -12,13 +12,13 @@ from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
 class Commands(BaseCommands):
 
     def join(self, sock, source, name):
-        user = User.objects.filter(sock=sock).first()
+        user = models.User.objects.filter(sock=sock).first()
 
         replies = [JOIN(name, prefix=user.prefix)]
 
-        channel = Channel.objects.filter(name=name).first()
+        channel = models.Channel.objects.filter(name=name).first()
         if channel is None:
-            channel = Channel(name=name)
+            channel = models.Channel(name=name)
             channel.save()
 
         if user in channel.users:
@@ -47,9 +47,9 @@ class Commands(BaseCommands):
         return replies
 
     def part(self, sock, source, name, reason="Leaving"):
-        user = User.objects.filter(sock=sock).first()
+        user = models.User.objects.filter(sock=sock).first()
 
-        channel = Channel.objects.filter(name=name).first()
+        channel = models.Channel.objects.filter(name=name).first()
 
         if channel is None:
             return
@@ -72,9 +72,9 @@ class Commands(BaseCommands):
             channel.delete()
 
     def topic(self, sock, source, name, topic=None):
-        user = User.objects.filter(sock=sock).first()
+        user = models.User.objects.filter(sock=sock).first()
 
-        channel = Channel.objects.filter(name=name).first()
+        channel = models.Channel.objects.filter(name=name).first()
         if channel is None:
             return ERR_NOSUCHCHANNEL(name)
 
@@ -90,13 +90,13 @@ class Commands(BaseCommands):
         self.notify(channel.users[:], TOPIC(channel.name, topic, prefix=user.prefix))
 
 
-class ChannelPlugin(BasePlugin):
+class Channel(BasePlugin):
     """Channel Plugin"""
 
     __version__ = "0.0.1"
     __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
-        super(ChannelPlugin, self).init(*args, **kwargs)
+        super(Channel, self).init(*args, **kwargs)
 
         Commands(*args, **kwargs).register(self)

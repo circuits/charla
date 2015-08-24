@@ -23,7 +23,7 @@ from ..plugin import BasePlugin
 
 
 DEFAULTS = (
-    "autojoin", "core", "channel", "checkhost", "debug",
+    "admin", "autojoin", "core", "channel", "checkhost", "debug",
     "hello", "message", "mode", "user", "ping", "processor", "welcome", "version",
 )
 
@@ -60,10 +60,9 @@ class Plugins(Component):
 
     def load(self, name, package=__package__):
         if name in self.plugins:
-            self.logger.warn(
-                "Not loading already loaded plugin: {0:s}".format(name)
-            )
-            return
+            msg = "Not loading already loaded plugin: {0:s}".format(name)
+            self.logger.warn(msg)
+            return msg
 
         try:
             fqplugin = "{0:s}.{1:s}".format(package, name)
@@ -80,39 +79,35 @@ class Plugins(Component):
             for name, Plugin in plugins:
                 instance = Plugin(*self.init_args, **self.init_kwargs)
                 instance.register(self)
-                self.logger.debug(
-                    "Registered Component: {0:s}".format(instance)
-                )
+                self.logger.debug("Registered Component: {0:s}".format(instance))
                 if name not in self.plugins:
                     self.plugins[name] = set()
                 self.plugins[name].add(instance)
 
-            self.logger.info("Loaded plugin: {0:s}".format(name))
+            msg = "Loaded plugin: {0:s}".format(name)
+            self.logger.info(msg)
+            return msg
         except Exception, e:
-            self.logger.error(
-                "Could not load plugin: {0:s} Error: {1:s}".format(
-                    name, e
-                )
-            )
+            msg = "Could not load plugin: {0:s} Error: {1:s}".format(name, e)
+            self.logger.error(msg)
             self.logger.error(format_exc())
+            return msg
 
     def unload(self, name):
         if name in self.plugins:
             instances = self.plugins[name]
             for instance in instances:
                 kill(instance)
-                self.logger.debug(
-                    "Unregistered Component: {0:s}".format(instance)
-                )
+                self.logger.debug("Unregistered Component: {0:s}".format(instance))
                 if hasattr(instance, "cleanup"):
                     instance.cleanup()
-                    self.logger.info(
-                        "Cleaned up Component: {0:s}".format(instance)
-                    )
+                    self.logger.debug("Cleaned up Component: {0:s}".format(instance))
             del self.plugins[name]
 
-            self.logger.info("Unloaded plugin: {0:s}".format(name))
+            msg = "Unloaded plugin: {0:s}".format(name)
+            self.logger.info(msg)
+            return msg
         else:
-            self.logger.warn(
-                "Not unloading unloaded plugin: {0:s}".format(name)
-            )
+            msg = "Not unloading unloaded plugin: {0:s}".format(name)
+            self.logger.warn(msg)
+            return msg
