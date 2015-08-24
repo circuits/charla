@@ -1,21 +1,24 @@
+import re
 from itertools import chain
 from operator import attrgetter
 
 
 from circuits.protocols.irc import joinprefix, Message
 
-from circuits.protocols.irc.replies import ERR_NICKNAMEINUSE
-
 
 from ..events import signon
 from ..plugin import BasePlugin
 from ..models import User, UserInfo
 from ..commands import BaseCommands
+from ..replies import ERR_ERRONEUSNICKNAME, ERR_NICKNAMEINUSE
+
+
+VALID_NICK_REGEX = re.compile(r"^[][\`_^{|}A-Za-z][][\`_^{|}A-Za-z0-9-]*$")
 
 
 class Commands(BaseCommands):
 
-    def quit(self, sock, source, reason="Leaving"):
+    def quit(self, sock, source, reason=u"Leaving"):
         user = User.objects.filter(sock=sock).first()
 
         for channel in user.channels:
@@ -28,10 +31,13 @@ class Commands(BaseCommands):
 
         self.disconnect(user)
 
-        self.notify(users, Message("QUIT", reason, prefix=user.prefix), user)
+        self.notify(users, Message(u"QUIT", reason, prefix=user.prefix), user)
 
     def nick(self, sock, source, nick):
         user = User.objects.filter(sock=sock).first()
+
+        if not VALID_NICK_REGEX.match(nick):
+            return ERR_ERRONEUSNICKNAME(nick)
 
         if User.objects.filter(nick=nick):
             return ERR_NICKNAMEINUSE(nick)
@@ -47,7 +53,7 @@ class Commands(BaseCommands):
 
         users = chain(*map(attrgetter("users"), user.channels))
 
-        self.notify(users, Message("NICK", nick, prefix=prefix))
+        self.notify(users, Message(u"NICK", nick, prefix=prefix))
 
     def user(self, sock, source, username, hostname, server, realname):
         _user = User.objects.filter(sock=sock).first()
@@ -74,10 +80,6 @@ class Commands(BaseCommands):
 
 
 class Core(BasePlugin):
-    """Core Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Core, self).init(*args, **kwargs)

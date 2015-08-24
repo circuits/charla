@@ -19,14 +19,14 @@ class Commands(BaseCommands):
 
         prefix = user.prefix or joinprefix(*source)
 
-        if target.startswith("#"):
+        if target.startswith(u"#"):
             channel = Channel.objects.filter(name=target).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
             self.notify(
                 channel.users,
-                _Message("PRIVMSG", target, message, prefix=prefix),
+                _Message(u"PRIVMSG", target, message, prefix=prefix),
                 user
             )
         else:
@@ -44,10 +44,6 @@ class Commands(BaseCommands):
 
 
 class Message(BasePlugin):
-    """Message Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Message, self).init(*args, **kwargs)

@@ -8,14 +8,10 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def hello(self, sock, source):
-        return Message("NOTICE", "*", "Hello!")
+        return Message(u"NOTICE", u"*", u"Hello!")
 
 
 class Hello(BasePlugin):
-    """Hello Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Hello, self).init(*args, **kwargs)

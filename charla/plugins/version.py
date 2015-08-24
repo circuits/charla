@@ -10,10 +10,6 @@ class Commands(BaseCommands):
 
 
 class Version(BasePlugin):
-    """VersionHello Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Version, self).init(*args, **kwargs)

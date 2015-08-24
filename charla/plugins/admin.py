@@ -13,21 +13,17 @@ class Commands(BaseCommands):
         result = yield self.call(query(name), "plugins")
 
         if result.value is None:
-            yield Message("NOTICE", "*", "No such plugin: {0}".format(name))
+            yield Message(u"NOTICE", u"*", u"No such plugin: {0}".format(name))
             return
 
         result = yield self.call(unload(name), "plugins")
-        yield Message("NOTICE", "*", result.value)
+        yield Message(u"NOTICE", u"*", result.value)
 
         result = yield self.call(load(name), "plugins")
-        yield Message("NOTICE", "*", result.value)
+        yield Message(u"NOTICE", u"*", result.value)
 
 
 class Admin(BasePlugin):
-    """Admin Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Admin, self).init(*args, **kwargs)

@@ -7,7 +7,7 @@ from ..replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOF
 class Commands(BaseCommands):
 
     def who(self, sock, source, mask):
-        if mask.startswith("#"):
+        if mask.startswith(u"#"):
             channel = models.Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
@@ -28,10 +28,6 @@ class Commands(BaseCommands):
 
 
 class User(BasePlugin):
-    """User Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(User, self).init(*args, **kwargs)

@@ -19,10 +19,6 @@ from ..replies import ERR_NEEDMOREPARAMS
 
 
 class Processor(BasePlugin):
-    """Processor Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Processor, self).init(*args, **kwargs)
@@ -86,7 +82,7 @@ class Processor(BasePlugin):
         user = User.objects.filter(sock=sock).first()
 
         if message.add_nick:
-            message.args.insert(0, user.nick or "")
+            message.args.insert(0, user.nick or u"")
 
         if message.prefix is None:
             message.prefix = self.server.host
@@ -120,8 +116,8 @@ class Processor(BasePlugin):
                 else:
                     self.logger.warn(
                         (
-                            "Handler for {0:s} returned "
-                            "unknown type {1:s} ({2:s})"
+                            u"Handler for {0:s} returned "
+                            u"unknown type {1:s} ({2:s})"
                         ).format(
                             name,
                             value.__class__.__name__,

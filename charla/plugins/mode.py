@@ -23,26 +23,26 @@ def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
 
     nick = User.objects.filter(nick=nick).first()
 
-    if mode == "o":
+    if mode == u"o":
         collection = channel.operators
-    elif mode == "v":
+    elif mode == u"v":
         collection = channel.voiced
 
-    if op == "+":
+    if op == u"+":
         collection.append(nick)
         channel.save()
 
-        yield True, MODE(channel.name, "{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
-    elif op == "-":
+        yield True, MODE(channel.name, u"{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
+    elif op == u"-":
         collection.remove(nick)
         channel.save()
 
-        yield True, MODE(channel.name, "{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
+        yield True, MODE(channel.name, u"{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
 
 
 channel_modes = {
-    "o": (1, process_channel_mode_ov),
-    "v": (1, process_channel_mode_ov),
+    u"o": (1, process_channel_mode_ov),
+    u"v": (1, process_channel_mode_ov),
 }
 
 
@@ -57,11 +57,11 @@ def process_channel_modes(user, channel, modes):
         try:
             mode = next(modes)
 
-            if mode and mode[0] == "+":
-                op = "+"
+            if mode and mode[0] == u"+":
+                op = u"+"
                 mode = mode[1:]
-            elif mode and mode[0] == "-":
-                op = "-"
+            elif mode and mode[0] == u"-":
+                op = u"-"
                 mode = mode[1:]
 
             if mode not in channel_modes:
@@ -75,22 +75,22 @@ def process_channel_modes(user, channel, modes):
 
 
 def process_user_mode(user, mode, op=None):
-    if op == "+":
+    if op == u"+":
         if mode in user.modes:
             return
         user.modes += mode
     else:
         if mode not in user.modes:
             return
-        user.modes = user.modes.replace(mode, "")
+        user.modes = user.modes.replace(mode, u"")
 
     user.save()
 
-    return MODE(user.nick, "{0}{1}".format(op, mode), prefix=user.nick)
+    return MODE(user.nick, u"{0}{1}".format(op, mode), prefix=user.nick)
 
 
 user_modes = {
-    "i": (0, process_user_mode),
+    u"i": (0, process_user_mode),
 }
 
 
@@ -101,11 +101,11 @@ def process_user_modes(user, modes):
         try:
             mode = next(modes)
 
-            if mode and mode[0] == "+":
-                op = "+"
+            if mode and mode[0] == u"+":
+                op = u"+"
                 mode = mode[1:]
-            elif mode and mode[0] == "-":
-                op = "-"
+            elif mode and mode[0] == u"-":
+                op = u"-"
                 mode = mode[1:]
 
             if mode not in user_modes:
@@ -134,12 +134,12 @@ class Commands(BaseCommands):
         """
 
         if not args:
-            return ERR_NEEDMOREPARAMS("MODE")
+            return ERR_NEEDMOREPARAMS(u"MODE")
 
         args = iter(args)
         mask = next(args)
 
-        if mask.startswith("#"):
+        if mask.startswith(u"#"):
             channel = Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
@@ -148,7 +148,7 @@ class Commands(BaseCommands):
 
             mode = next(args, None)
             if mode is None:
-                return RPL_CHANNELMODEIS(channel.name, "+{0}".format(channel.modes))
+                return RPL_CHANNELMODEIS(channel.name, u"+{0}".format(channel.modes))
 
             return self._process_channel_modes(user, channel, [mode] + list(args))
         else:
@@ -158,19 +158,12 @@ class Commands(BaseCommands):
 
             mode = next(args, None)
             if mode is None:
-                return RPL_UMODEIS("+{0}".format(user.modes))
+                return RPL_UMODEIS(u"+{0}".format(user.modes))
 
             return process_user_modes(user, [mode] + list(args))
 
 
 class Mode(BasePlugin):
-    """Mode Plugin
-
-    This plugin provides commands and support for User and Channel Modes
-    """
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Mode, self).init(*args, **kwargs)

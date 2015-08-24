@@ -33,7 +33,7 @@ class Commands(BaseCommands):
         user.save()
 
         if not channel.users:
-            replies.append(MODE(name, "+o {0}".format(user.nick), prefix=self.server.host))
+            replies.append(MODE(name, u"+o {0}".format(user.nick), prefix=self.server.host))
             channel.operators.append(user)
             channel.save()
 
@@ -46,7 +46,7 @@ class Commands(BaseCommands):
 
         return replies
 
-    def part(self, sock, source, name, reason="Leaving"):
+    def part(self, sock, source, name, reason=u"Leaving"):
         user = models.User.objects.filter(sock=sock).first()
 
         channel = models.Channel.objects.filter(name=name).first()
@@ -59,7 +59,7 @@ class Commands(BaseCommands):
 
         self.notify(
             channel.users,
-            Message("PART", name, reason, prefix=user.prefix)
+            Message(u"PART", name, reason, prefix=user.prefix)
         )
 
         user.channels.remove(channel)
@@ -91,10 +91,6 @@ class Commands(BaseCommands):
 
 
 class Channel(BasePlugin):
-    """Channel Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(Channel, self).init(*args, **kwargs)

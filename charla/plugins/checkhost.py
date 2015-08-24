@@ -18,10 +18,6 @@ def check_host(sock):
 
 
 class CheckHost(BasePlugin):
-    """Check Host Plugin"""
-
-    __version__ = "0.0.1"
-    __author__ = "James Mills, prologic at shortcircuit dot net dot au"
 
     def init(self, *args, **kwargs):
         super(CheckHost, self).init(*args, **kwargs)
@@ -32,7 +28,7 @@ class CheckHost(BasePlugin):
         _, sock = e.args
         del self.pending[sock]
 
-        self.fire(reply(sock, Message("NOTICE", "*", "*** Found your hostname")))
+        self.fire(reply(sock, Message(u"NOTICE", u"*", u"*** Found your hostname")))
 
         user = User.objects.filter(sock=sock).first()
 
@@ -52,7 +48,7 @@ class CheckHost(BasePlugin):
     def connect(self, sock, *args):
         host, port = args[:2]
         self.pending[sock] = True
-        self.fire(reply(sock, Message("NOTICE", "*", "*** Looking up your hostname...")))
+        self.fire(reply(sock, Message(u"NOTICE", u"*", u"*** Looking up your hostname...")))
 
         e = task(check_host, sock)
         e.complete = True
