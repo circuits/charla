@@ -29,14 +29,13 @@ class Server(Component):
     host = "localhost"
     created = datetime.utcnow()
 
-    features = (
-        "PREFIX=(ov)@+",
-        "CHANTYPES=#&",
-    )
-
     url = __url__
     name = __name__
     version = __version__
+
+    features = (
+        "NETWORK={0}".format(network),
+    )
 
     def init(self, config, db):
         self.config = config
@@ -93,3 +92,6 @@ class Server(Component):
         quit.complete_channels = ("server",)
 
         self.fire(quit)
+
+    def supports(self):
+        return self.features

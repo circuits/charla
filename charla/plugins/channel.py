@@ -104,4 +104,12 @@ class Channel(BasePlugin):
     def init(self, *args, **kwargs):
         super(Channel, self).init(*args, **kwargs)
 
+        self.features = (
+            "PREFIX=(ov)@+",
+            "CHANTYPES=#&",
+        )
+
         Commands(*args, **kwargs).register(self)
+
+    def supports(self):
+        return self.features

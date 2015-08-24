@@ -1,8 +1,16 @@
+from itertools import chain
+
+
+from circuits import Event
 from circuits.protocols.irc import reply
 
 
 from ..plugin import BasePlugin
 from ..replies import ERR_NOMOTD, RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_ISUPPORT
+
+
+class supports(Event):
+    """supports Event"""
 
 
 class Welcome(BasePlugin):
@@ -13,7 +21,10 @@ class Welcome(BasePlugin):
         self.fire(reply(sock, RPL_WELCOME(self.server.network)))
         self.fire(reply(sock, RPL_YOURHOST(self.server.host, version)))
         self.fire(reply(sock, RPL_CREATED(self.server.created)))
+
         # XXX: 004?
-        self.fire(reply(sock, RPL_ISUPPORT(self.server.features)))
+
+        result = yield self.call(supports())
+        self.fire(reply(sock, RPL_ISUPPORT(tuple(chain(*result.value)))))
 
         self.fire(reply(sock, ERR_NOMOTD()))
