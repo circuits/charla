@@ -3,6 +3,7 @@ import re
 
 from circuits.protocols.irc import Message
 
+from funcy import flatten
 
 from .. import models
 from ..plugin import BasePlugin
@@ -17,7 +18,7 @@ VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")
 
 class Commands(BaseCommands):
 
-    def join(self, sock, source, name):
+    def _join(self, sock, source, name):
         user = models.User.objects.filter(sock=sock).first()
 
         if name and name[0] not in self.parent.chantypes:
@@ -65,6 +66,9 @@ class Commands(BaseCommands):
         replies.append(RPL_ENDOFNAMES(name))
 
         return replies
+
+    def join(self, sock, source, names):
+        return flatten(self._join(sock, source, name) for name in names.split(u","))
 
     def part(self, sock, source, name, reason=u"Leaving"):
         user = models.User.objects.filter(sock=sock).first()
