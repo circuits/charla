@@ -8,7 +8,7 @@ from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
 from ..replies import MODE, JOIN, TOPIC
-from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES
+from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
 from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 
@@ -103,6 +103,9 @@ class Commands(BaseCommands):
 
         if topic is None:
             return RPL_TOPIC(channel.name, channel.topic)
+
+        if u"t" in channel.modes and user not in channel.operators:
+            return ERR_CHANOPRIVSNEEDED(channel.name)
 
         channel.topic = topic
         channel.save()

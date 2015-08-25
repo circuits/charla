@@ -2,6 +2,7 @@ from itertools import imap
 from operator import attrgetter
 
 
+from six import u
 from funcy import take
 
 
@@ -13,8 +14,35 @@ from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
 from ..replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
 
 
+def process_channel_mode(user, channel, mode, *args, **kwargs):
+    op = kwargs.get("op", None)
+
+    if op is not None and user not in channel.operators:
+        yield False, ERR_CHANOPRIVSNEEDED(channel.name)
+        return
+
+    if op == u("+"):
+        if mode in channel.modes:
+            yield False, None
+            return
+        channel.modes += mode
+    else:
+        if mode not in channel.modes:
+            yield False, None
+            return
+        channel.modes = channel.modes.replace(mode, u(""))
+
+    channel.save()
+
+    yield True, MODE(channel.name, u("{0}{1}").format(op, mode), prefix=user.prefix)
+
+
 def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
     op = kwargs.get("op", None)
+
+    if op is not None and user not in channel.operators:
+        yield False, ERR_CHANOPRIVSNEEDED(channel.name)
+        return
 
     nick = args[0]
     if nick not in imap(attrgetter("nick"), channel.users):
@@ -23,45 +51,42 @@ def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
 
     nick = User.objects.filter(nick=nick).first()
 
-    if mode == u"o":
+    if mode == u("o"):
         collection = channel.operators
-    elif mode == u"v":
+    elif mode == u("v"):
         collection = channel.voiced
 
-    if op == u"+":
+    if op == u("+"):
         collection.append(nick)
         channel.save()
 
-        yield True, MODE(channel.name, u"{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
-    elif op == u"-":
+        yield True, MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
+    elif op == u("-"):
         collection.remove(nick)
         channel.save()
 
-        yield True, MODE(channel.name, u"{0}{1}".format(op, mode), [nick.nick], prefix=user.prefix)
+        yield True, MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
 
 
 channel_modes = {
-    u"o": (1, process_channel_mode_ov),
-    u"v": (1, process_channel_mode_ov),
+    u("t"): (0, process_channel_mode),
+    u("o"): (1, process_channel_mode_ov),
+    u("v"): (1, process_channel_mode_ov),
 }
 
 
 def process_channel_modes(user, channel, modes):
-    if user not in channel.operators:
-        yield False, ERR_CHANOPRIVSNEEDED(channel.name)
-        return
-
     op = None
     modes = iter(modes)
     while True:
         try:
             mode = next(modes)
 
-            if mode and mode[0] == u"+":
-                op = u"+"
+            if mode and mode[0] == u("+"):
+                op = u("+")
                 mode = mode[1:]
-            elif mode and mode[0] == u"-":
-                op = u"-"
+            elif mode and mode[0] == u("-"):
+                op = u("-")
                 mode = mode[1:]
 
             if mode not in channel_modes:
@@ -75,22 +100,22 @@ def process_channel_modes(user, channel, modes):
 
 
 def process_user_mode(user, mode, op=None):
-    if op == u"+":
+    if op == u("+"):
         if mode in user.modes:
             return
         user.modes += mode
     else:
         if mode not in user.modes:
             return
-        user.modes = user.modes.replace(mode, u"")
+        user.modes = user.modes.replace(mode, u(""))
 
     user.save()
 
-    return MODE(user.nick, u"{0}{1}".format(op, mode), prefix=user.nick)
+    return MODE(user.nick, u("{0}{1})").format(op, mode), prefix=user.nick)
 
 
 user_modes = {
-    u"i": (0, process_user_mode),
+    u("i"): (0, process_user_mode),
 }
 
 
@@ -101,11 +126,11 @@ def process_user_modes(user, modes):
         try:
             mode = next(modes)
 
-            if mode and mode[0] == u"+":
-                op = u"+"
+            if mode and mode[0] == u("+"):
+                op = u("+")
                 mode = mode[1:]
-            elif mode and mode[0] == u"-":
-                op = u"-"
+            elif mode and mode[0] == u("-"):
+                op = u("-")
                 mode = mode[1:]
 
             if mode not in user_modes:
@@ -123,7 +148,7 @@ class Commands(BaseCommands):
         for notify, message in process_channel_modes(user, channel, modes):
             if notify:
                 self.notify(channel.users[:], message)
-            else:
+            elif message is not None:
                 yield message
 
     def mode(self, sock, source, *args):
@@ -139,7 +164,7 @@ class Commands(BaseCommands):
         args = iter(args)
         mask = next(args)
 
-        if mask.startswith(u"#"):
+        if mask.startswith(u("#")):
             channel = Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
@@ -148,7 +173,7 @@ class Commands(BaseCommands):
 
             mode = next(args, None)
             if mode is None:
-                return RPL_CHANNELMODEIS(channel.name, u"+{0}".format(channel.modes))
+                return RPL_CHANNELMODEIS(channel.name, u("+{0}").format(channel.modes))
 
             return self._process_channel_modes(user, channel, [mode] + list(args))
         else:
@@ -158,7 +183,7 @@ class Commands(BaseCommands):
 
             mode = next(args, None)
             if mode is None:
-                return RPL_UMODEIS(u"+{0}".format(user.modes))
+                return RPL_UMODEIS(u("+{0}").format(user.modes))
 
             return process_user_modes(user, [mode] + list(args))
 
