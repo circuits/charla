@@ -28,3 +28,16 @@ From PyPi (*ccoming soon*):
 
     $ pip install charla
     $ charla
+
+Demo
+----
+
+There is a demo of the development version of charla running at `daisy.shortcircuit.net.au` on port `7000` if you're interested in testing charla out or want to help out with testing or get involved in the development!
+
+To connect with your favourite IRC Client:
+
+    /server daisy.shortcircuit.net.au 7000
+
+> **note**
+>
+> The server may often get restarted as it's being developed so please be aware of this!
