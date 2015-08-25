@@ -62,7 +62,7 @@ class Commands(BaseCommands):
 
         replies.append(RPL_NOTOPIC(name))
         replies.append(RPL_NAMEREPLY(channel.name, channel.userprefixes))
-        replies.append(RPL_ENDOFNAMES())
+        replies.append(RPL_ENDOFNAMES(name))
 
         return replies
 
