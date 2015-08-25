@@ -104,3 +104,28 @@ def RPL_MOTD(text):
 
 def RPL_ENDOFMOTD():
     return _M(u"376", u"End of MOTD command")
+
+
+def RPL_LUSERCLIENT(nusers, nservices, nservers):
+    return _M(
+        u("251"),
+        u("There are {0} users and {1} services on {2} servers").format(
+            nusers, nservices, nservers
+        )
+    )
+
+
+def RPL_LUSEROP(noperators):
+    return _M(u("252"), u("{0}").format(noperators), u("operator(s) online"))
+
+
+def RPL_LUSERUNKOWN(nunknown):
+    return _M(u("253"), u("{0}").format(nunknown), u("unknown connection(s)"))
+
+
+def RPL_LUSERCHANNELS(nchannels):
+    return _M(u("254"), u("{0}").format(nchannels), u("channels formed"))
+
+
+def RPL_LUSERME(nclients, nservers):
+    return _M(u("255"), u("I have {0} clients and {1} servers".format(nclients, nservers)))

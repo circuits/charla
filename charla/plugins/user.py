@@ -3,11 +3,24 @@ from ..plugin import BasePlugin
 from ..commands import BaseCommands
 from ..replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD
 from ..replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
+from ..replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
 from ..replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
 from ..replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
 
 
 class Commands(BaseCommands):
+
+    def lusers(self, sock, source):
+        nusers = len(models.User.objects.all())
+        nchannels = len(models.Channel.objects.all())
+        nservices = 0
+        nservers = 1
+
+        return [
+            RPL_LUSERCLIENT(nusers, nservices, nservers),
+            RPL_LUSERCHANNELS(nchannels),
+            RPL_LUSERME(nusers, nservers),
+        ]
 
     def motd(self, sock, source):
         if not self.server.motd.exists():

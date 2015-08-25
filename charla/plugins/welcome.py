@@ -3,10 +3,11 @@ from itertools import chain
 
 from circuits import Event
 from circuits.protocols.irc import reply
+from circuits.protocols.irc import response
 
 
 from ..plugin import BasePlugin
-from ..replies import ERR_NOMOTD, RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_ISUPPORT
+from ..replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_ISUPPORT
 
 
 class supports(Event):
@@ -27,5 +28,5 @@ class Welcome(BasePlugin):
         result = yield self.call(supports())
         self.fire(reply(sock, RPL_ISUPPORT(tuple(chain(*result.value)))))
 
-        if not self.server.motd.exists():
-            self.fire(reply(sock, ERR_NOMOTD()))
+        self.fire(response.create("lusers", sock, source))
+        self.fire(response.create("motd", sock, source))
