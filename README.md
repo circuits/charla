@@ -24,7 +24,7 @@ Using [Docker](https://www.docker.com/):
 
     $ docker run -d 7000:7000 prologic/charla
 
-From PyPi (*ccoming soon*):
+From PyPi (*coming soon*):
 
     $ pip install charla
     $ charla
