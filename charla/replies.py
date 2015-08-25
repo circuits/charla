@@ -129,3 +129,7 @@ def RPL_LUSERCHANNELS(nchannels):
 
 def RPL_LUSERME(nclients, nservers):
     return _M(u("255"), u("I have {0} clients and {1} servers".format(nclients, nservers)))
+
+
+def ERR_CANNOTSENDTOCHAN(channel):
+    return _M(u("404"), channel, u("Cannot send to channel"))

@@ -9,6 +9,7 @@ from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
+from ..replies import ERR_CANNOTSENDTOCHAN
 
 
 class Commands(BaseCommands):
@@ -23,6 +24,9 @@ class Commands(BaseCommands):
             channel = Channel.objects.filter(name=target).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
+
+            if "n" in channel.modes and user not in channel.users:
+                return ERR_CANNOTSENDTOCHAN(channel.name)
 
             self.notify(
                 channel.users,
