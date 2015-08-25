@@ -108,7 +108,7 @@ class Commands(BaseCommands):
         if topic is None:
             return RPL_TOPIC(channel.name, channel.topic)
 
-        if u"t" in channel.modes and user not in channel.operators:
+        if not user.oper and u"t" in channel.modes and user not in channel.operators:
             return ERR_CHANOPRIVSNEEDED(channel.name)
 
         channel.topic = topic

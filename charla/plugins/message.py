@@ -25,7 +25,7 @@ class Commands(BaseCommands):
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
-            if "n" in channel.modes and user not in channel.users:
+            if not user.oper and "n" in channel.modes and user not in channel.users:
                 return ERR_CANNOTSENDTOCHAN(channel.name)
 
             self.notify(

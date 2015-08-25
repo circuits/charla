@@ -1,9 +1,9 @@
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD
-from ..replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
+from ..replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
 from ..replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
+from ..replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD, RPL_WHOISOPERATOR
 from ..replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
 from ..replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
 
@@ -11,14 +11,17 @@ from ..replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_END
 class Commands(BaseCommands):
 
     def lusers(self, sock, source):
-        nusers = len(models.User.objects.all())
+        users = models.User.objects.all()
+        nusers = len(users)
         nchannels = len(models.Channel.objects.all())
+        noperators = len([x for x in users if u"o" in x.modes])
         nservices = 0
         nservers = 1
 
         return [
             RPL_LUSERCLIENT(nusers, nservices, nservers),
             RPL_LUSERCHANNELS(nchannels),
+            RPL_LUSEROP(noperators),
             RPL_LUSERME(nusers, nservers),
         ]
 
@@ -62,12 +65,18 @@ class Commands(BaseCommands):
         if len(channels) == 1:
             channels.append("")
 
-        return [
-            RPL_WHOISUSER(user.nick, userinfo.user, userinfo.host, userinfo.name),
-            RPL_WHOISCHANNELS(user.nick, channels),
-            RPL_WHOISSERVER(user.nick, server.host, server.info),
-            RPL_ENDOFWHOIS(user.nick),
-        ]
+        replies = []
+
+        replies.append(RPL_WHOISUSER(user.nick, userinfo.user, userinfo.host, userinfo.name))
+        replies.append(RPL_WHOISCHANNELS(user.nick, channels))
+        replies.append(RPL_WHOISSERVER(user.nick, server.host, server.info))
+
+        if user.oper:
+            replies.append(RPL_WHOISOPERATOR(user.nick))
+
+        replies.append(RPL_ENDOFWHOIS(user.nick))
+
+        return replies
 
     def who(self, sock, source, mask):
         if mask.startswith(u"#"):

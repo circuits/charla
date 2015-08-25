@@ -40,7 +40,7 @@ def process_channel_mode(user, channel, mode, *args, **kwargs):
 def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
     op = kwargs.get("op", None)
 
-    if op is not None and user not in channel.operators:
+    if op is not None and not user.oper and user not in channel.operators:
         yield False, ERR_CHANOPRIVSNEEDED(channel.name)
         return
 

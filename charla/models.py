@@ -69,6 +69,10 @@ class User(Model):
         return "<{0} {1}>".format(key, attrs)
 
     @property
+    def oper(self):
+        return "o" in self.modes
+
+    @property
     def prefix(self):
         userinfo = self.userinfo
         if userinfo is None:
