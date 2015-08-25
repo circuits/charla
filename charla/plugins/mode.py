@@ -176,7 +176,7 @@ class Commands(BaseCommands):
             if mode is None:
                 return RPL_CHANNELMODEIS(channel.name, u("+{0}").format(channel.modes))
 
-            return self._process_channel_modes(user, channel, mode + u("").join(args))
+            return self._process_channel_modes(user, channel, [mode] + list(args))
         else:
             user = User.objects.filter(nick=mask).first()
             if user is None:
@@ -186,7 +186,7 @@ class Commands(BaseCommands):
             if mode is None:
                 return RPL_UMODEIS(u("+{0}").format(user.modes))
 
-            return process_user_modes(user, mode + u("").join(args))
+            return process_user_modes(user, [mode] + list(args))
 
 
 class Mode(BasePlugin):
