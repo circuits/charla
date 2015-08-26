@@ -20,4 +20,4 @@ class BasePlugin(Component):
         self.config = config
         self.db = db
 
-        self.logger = getLogger(__name__)
+        self.logger = getLogger("plugins.{0}".format(self.__class__.__name__))

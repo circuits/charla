@@ -149,3 +149,7 @@ def RPL_YOUREOPER():
 
 def ERR_NOOPERHOST():
     return _M(u("491"), u("No O-lines for your host"))
+
+
+def ERR_NOPRIVILEGES():
+    return _M(u("481"), u("Permission Denied- You're not an IRC operator"))

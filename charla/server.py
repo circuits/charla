@@ -10,7 +10,7 @@ from logging import getLogger
 from collections import defaultdict
 
 
-from circuits import Component
+from circuits import Event, Component, Timer
 
 from circuits.net.sockets import TCPServer, TCP6Server
 
@@ -21,6 +21,10 @@ from pathlib import Path
 
 from .models import User
 from . import __name__, __url__, __version__
+
+
+class setup(Event):
+    """setup Event"""
 
 
 class Server(Component):
@@ -50,27 +54,35 @@ class Server(Component):
 
         self.buffers = defaultdict(bytes)
 
-        port = config["port"]
+        self.port = config["port"]
 
         if has_ipv6:
-            address = "::"
-            Transport = TCP6Server
+            self.address = "::"
+            self.Transport = TCP6Server
         else:
-            address = "0.0.0.0"
-            Transport = TCPServer
+            self.address = "0.0.0.0"
+            self.Transport = TCPServer
 
-        bind = (address, port)
+        self.bind = (self.address, self.port)
 
-        self.transport = Transport(
-            bind,
-            channel=self.channel
-        ).register(self)
+        self.fire(setup())
 
-        self.protocol = IRC(
-            channel=self.channel,
-            getBuffer=self.buffers.__getitem__,
-            updateBuffer=self.buffers.__setitem__
-        ).register(self)
+    def setup(self):
+        try:
+            self.transport = self.Transport(
+                self.bind,
+                channel=self.channel
+            ).register(self)
+
+            self.protocol = IRC(
+                channel=self.channel,
+                getBuffer=self.buffers.__getitem__,
+                updateBuffer=self.buffers.__setitem__
+            ).register(self)
+        except Exception as e:
+            self.logger.error("Cannot start server: {0}".format(e))
+            self.logger.info("Retrying in 5s ...")
+            Timer(5, setup()).register(self)
 
     def ready(self, server, bind):
         self.logger.info(
