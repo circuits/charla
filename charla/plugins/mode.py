@@ -194,4 +194,13 @@ class Mode(BasePlugin):
     def init(self, *args, **kwargs):
         super(Mode, self).init(*args, **kwargs)
 
+        self.chanmodes = u",,,nt"
+
+        self.features = (
+            u"CHANMODES={0}".format(self.chanmodes),
+        )
+
         Commands(*args, **kwargs).register(self)
+
+    def supports(self):
+        return self.features

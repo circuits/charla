@@ -1,19 +1,25 @@
 import re
+from operator import attrgetter
 
 
 from circuits.protocols.irc import response, Message
 
-from funcy import flatten
+from funcy import imap, flatten
 
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND
+from ..replies import _M
 from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
+from ..replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND, ERR_USERNOTINCHANNEL
 from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 
 VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")
+
+
+def KICK(channel, nick, reason=None, prefix=None):
+    return _M(u"KICK", channel, nick, reason or nick, prefix=prefix)
 
 
 class Commands(BaseCommands):
@@ -136,6 +142,35 @@ class Commands(BaseCommands):
         replies.append(RPL_LISTEND)
 
         return replies
+
+    def kick(self, sock, source, name, nick, reason=None):
+        user = models.User.objects.filter(sock=sock).first()
+
+        channel = models.Channel.objects.filter(name=name).first()
+        if channel is None:
+            return ERR_NOSUCHCHANNEL(name)
+
+        if not user.oper and user not in channel.operators:
+            return ERR_CHANOPRIVSNEEDED(channel.name)
+
+        if nick not in imap(attrgetter("nick"), channel.users):
+            return ERR_USERNOTINCHANNEL(nick, channel.name)
+
+        nick = models.User.objects.filter(nick=nick).first()
+
+        self.notify(
+            channel.users[:],
+            Message(u"KICK", channel.name, nick.nick, reason or nick.nick, prefix=user.prefix)
+        )
+
+        nick.channels.remove(channel)
+        nick.save()
+
+        channel.users.remove(nick)
+        channel.save()
+
+        if not channel.users:
+            channel.delete()
 
 
 class Channel(BasePlugin):
