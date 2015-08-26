@@ -8,7 +8,7 @@ from funcy import flatten
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import MODE, JOIN, TOPIC
+from ..replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND
 from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
 from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
@@ -125,6 +125,17 @@ class Commands(BaseCommands):
         channel.save()
 
         self.notify(channel.users[:], TOPIC(channel.name, topic, prefix=user.prefix))
+
+    def list(self, sock, source):
+        replies = []
+
+        for channel in models.Channel.objects.all():
+            nvisible = len([x for x in channel.users if x.visible])
+            replies.append(RPL_LIST(channel.name, nvisible, channel.topic))
+
+        replies.append(RPL_LISTEND)
+
+        return replies
 
 
 class Channel(BasePlugin):

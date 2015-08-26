@@ -73,6 +73,14 @@ class User(Model):
         return "o" in self.modes
 
     @property
+    def visible(self):
+        return not self.invisible
+
+    @property
+    def invisible(self):
+        return "i" in self.modes
+
+    @property
     def prefix(self):
         userinfo = self.userinfo
         if userinfo is None:

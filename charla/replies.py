@@ -153,3 +153,11 @@ def ERR_NOOPERHOST():
 
 def ERR_NOPRIVILEGES():
     return _M(u("481"), u("Permission Denied- You're not an IRC operator"))
+
+
+def RPL_LIST(channel, nvisible, topic):
+    return _M(u("322"), channel, u("{0}").format(nvisible), topic)
+
+
+def RPL_LISTEND():
+    return _M(u("323"), u("End of LIST"))
