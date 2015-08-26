@@ -1,7 +1,7 @@
 import re
 
 
-from circuits.protocols.irc import Message
+from circuits.protocols.irc import response, Message
 
 from funcy import flatten
 
@@ -61,9 +61,8 @@ class Commands(BaseCommands):
         channel.users.append(user)
         channel.save()
 
-        replies.append(RPL_NOTOPIC(name))
-        replies.append(RPL_NAMEREPLY(channel.name, channel.userprefixes))
-        replies.append(RPL_ENDOFNAMES(name))
+        self.fire(response.create("topic", sock, source, channel.name), "server")
+        self.fire(response.create("names", sock, source, channel.name), "server")
 
         return replies
 
@@ -94,6 +93,17 @@ class Commands(BaseCommands):
 
         if not channel.users:
             channel.delete()
+
+    def names(self, sock, source, name):
+        channel = models.Channel.objects.filter(name=name).first()
+
+        if channel is None:
+            return ERR_NOSUCHCHANNEL(name)
+
+        return [
+            RPL_NAMEREPLY(channel.name, channel.userprefixes),
+            RPL_ENDOFNAMES(name),
+        ]
 
     def topic(self, sock, source, name, topic=None):
         user = models.User.objects.filter(sock=sock).first()
