@@ -33,6 +33,17 @@ class Commands(BaseCommands):
 
         return ERR_PASSWDMISMATCH()
 
+    def load(self, sock, source, name):
+        user = User.objects.filter(sock=sock).first()
+        if not user.oper:
+            yield ERR_NOPRIVILEGES()
+            return
+
+        name = str(name)  # We store plugin names as str (not unicode)
+
+        result = yield self.call(load(name), "plugins")
+        yield Message(u"NOTICE", u"*", result.value)
+
     def reload(self, sock, source, name):
         user = User.objects.filter(sock=sock).first()
         if not user.oper:
@@ -50,6 +61,22 @@ class Commands(BaseCommands):
         yield Message(u"NOTICE", u"*", result.value)
 
         result = yield self.call(load(name), "plugins")
+        yield Message(u"NOTICE", u"*", result.value)
+
+    def unload(self, sock, source, name):
+        user = User.objects.filter(sock=sock).first()
+        if not user.oper:
+            yield ERR_NOPRIVILEGES()
+            return
+
+        name = str(name)  # We store plugin names as str (not unicode)
+        result = yield self.call(query(name), "plugins")
+
+        if result.value is None:
+            yield Message(u"NOTICE", u"*", u"No such plugin: {0}".format(name))
+            return
+
+        result = yield self.call(unload(name), "plugins")
         yield Message(u"NOTICE", u"*", result.value)
 
     def die(self, sock, source):
