@@ -9,8 +9,8 @@ from funcy import take
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
-from ..replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS
 from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
+from ..replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS, ERR_USERSDONTMATCH
 from ..replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
 
 
@@ -105,6 +105,8 @@ def process_user_mode(user, mode, op=None):
     if op == u("+"):
         if mode in user.modes:
             return
+        if mode == "o":
+            return
         user.modes += mode
     else:
         if mode not in user.modes:
@@ -164,6 +166,8 @@ class Commands(BaseCommands):
         if not args:
             return ERR_NEEDMOREPARAMS(u"MODE")
 
+        user = User.objects.filter(sock=sock).first()
+
         args = iter(args)
         mask = next(args)
 
@@ -172,23 +176,24 @@ class Commands(BaseCommands):
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
 
-            user = User.objects.filter(sock=sock).first()
-
             mode = next(args, None)
             if mode is None:
                 return RPL_CHANNELMODEIS(channel.name, u("+{0}").format(channel.modes))
 
             return self._process_channel_modes(user, channel, [mode] + list(args))
         else:
-            user = User.objects.filter(nick=mask).first()
-            if user is None:
+            nick = User.objects.filter(nick=mask).first()
+            if nick is None:
                 return ERR_NOSUCHNICK(mask)
+
+            if user.nick != nick.nick:
+                return ERR_USERSDONTMATCH()
 
             mode = next(args, None)
             if mode is None:
-                return RPL_UMODEIS(u("+{0}").format(user.modes))
+                return RPL_UMODEIS(u("+{0}").format(nick.modes))
 
-            return process_user_modes(user, [mode] + list(args))
+            return process_user_modes(nick, [mode] + list(args))
 
 
 class Mode(BasePlugin):

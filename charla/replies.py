@@ -165,3 +165,7 @@ def RPL_LIST(channel, nvisible, topic):
 
 def RPL_LISTEND():
     return _M(u("323"), u("End of LIST"))
+
+
+def ERR_USERSDONTMATCH():
+    return _M(u("502"), u("Cannot change mode for other users"))
