@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+
+from __future__ import print_function
+
+from socket import socket
+
+
+from redisco import connection_setup, get_client
+
+
+from charla.models import User, Channel
+
+
+connection_setup()
+db = get_client()

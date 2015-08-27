@@ -19,7 +19,7 @@ class SocketField(Attribute):
     cache = bidict()
 
     def typecast_for_read(self, value):
-        return self.cache[int(value)]
+        return self.cache.get(int(value), None)
 
     def typecast_for_storage(self, value):
         if value is None:
