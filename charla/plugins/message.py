@@ -1,3 +1,6 @@
+from itertools import chain
+
+
 from circuits import handler
 
 from circuits.protocols.irc import joinprefix, reply
@@ -25,8 +28,13 @@ class Commands(BaseCommands):
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
-            if not user.oper and "n" in channel.modes and user not in channel.users:
-                return ERR_CANNOTSENDTOCHAN(channel.name)
+            if "n" in channel.modes:
+                if not user.oper and user not in channel.users:
+                    return ERR_CANNOTSENDTOCHAN(channel.name)
+
+            if "m" in channel.modes:
+                if not user.oper and user not in chain(channel.operators, channel.voiced):
+                    return ERR_CANNOTSENDTOCHAN(channel.name)
 
             self.notify(
                 channel.users,

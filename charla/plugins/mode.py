@@ -69,6 +69,7 @@ def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
 
 
 channel_modes = {
+    u("m"): (0, process_channel_mode),
     u("n"): (0, process_channel_mode),
     u("t"): (0, process_channel_mode),
     u("o"): (1, process_channel_mode_ov),
