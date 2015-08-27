@@ -42,7 +42,7 @@ class Commands(BaseCommands):
         if len(nick) > self.parent.nicklen:
             return ERR_ERRONEUSNICKNAME(nick)
 
-        if User.objects.filter(nick=nick):
+        if any(x for x in User.objects.all() if x.nick and x.nick.lower() == nick):
             return ERR_NICKNAMEINUSE(nick)
 
         prefix = user.prefix or joinprefix(*source)
