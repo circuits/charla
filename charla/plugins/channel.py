@@ -95,6 +95,10 @@ class Commands(BaseCommands):
         user.save()
 
         channel.users.remove(user)
+        if user in channel.operators:
+            channel.operators.remove(user)
+        if user in channel.voiced:
+            channel.voiced.remove(user)
         channel.save()
 
         if not channel.users:
@@ -167,6 +171,10 @@ class Commands(BaseCommands):
         nick.save()
 
         channel.users.remove(nick)
+        if user in channel.operators:
+            channel.operators.remove(user)
+        if user in channel.voiced:
+            channel.voiced.remove(user)
         channel.save()
 
         if not channel.users:
