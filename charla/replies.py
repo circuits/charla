@@ -26,6 +26,10 @@ def RPL_CREATED(date):
     return _M(u"003", u"This server was created {0}".format(date))
 
 
+def RPL_MYINFO(server, version, umodes, chmodes):
+    return _M(u("004"), server, version, umodes, chmodes)
+
+
 def RPL_ISUPPORT(features):
     return _M(u"005", *(features + (u"are supported by this server",)))
 

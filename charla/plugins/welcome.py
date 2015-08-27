@@ -6,8 +6,10 @@ from circuits.protocols.irc import reply
 from circuits.protocols.irc import response
 
 
+from .mode import channel_modes, user_modes
+
 from ..plugin import BasePlugin
-from ..replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_ISUPPORT
+from ..replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_MYINFO, RPL_ISUPPORT
 
 
 class supports(Event):
@@ -17,13 +19,15 @@ class supports(Event):
 class Welcome(BasePlugin):
 
     def signon(self, sock, source):
-        version = u"{0} {1}".format(self.server.name, self.server.version)
+        version = u"{0}-{1}".format(self.server.name, self.server.version)
+
+        umodes = u"".join(user_modes.keys())
+        chmodes = u"".join(channel_modes.keys())
 
         self.fire(reply(sock, RPL_WELCOME(self.server.network)))
         self.fire(reply(sock, RPL_YOURHOST(self.server.host, version)))
         self.fire(reply(sock, RPL_CREATED(self.server.created)))
-
-        # XXX: 004?
+        self.fire(reply(sock, RPL_MYINFO(self.server.host, version, umodes, chmodes)))
 
         result = yield self.call(supports())
         self.fire(reply(sock, RPL_ISUPPORT(tuple(chain(*result.value)))))

@@ -117,6 +117,7 @@ def process_user_mode(user, mode, op=None):
 
 
 user_modes = {
+    u("o"): (0, process_user_mode),
     u("i"): (0, process_user_mode),
 }
 
