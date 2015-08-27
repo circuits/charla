@@ -83,7 +83,7 @@ def ERR_NONICKNAMEGIVEN():
 
 
 def RPL_WHOISUSER(nick, user, host, realname):
-    return _M(u"311", nick, user, host, u"*", realname)
+    return _M(u"311", nick, user, host, u"*", u" {0}".format(realname))
 
 
 def RPL_WHOISOPERATOR(nick):
