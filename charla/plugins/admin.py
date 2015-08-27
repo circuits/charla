@@ -4,13 +4,14 @@ from fnmatch import fnmatch
 
 
 from circuits.net.events import close
-from circuits.protocols.irc import Message
+from circuits.protocols.irc import response
 
 
 from ..models import User
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
 from ..plugins import load, query, unload
+from ..replies import Message, ERR_NOSUCHNICK
 from ..replies import ERR_PASSWDMISMATCH, RPL_YOUREOPER, ERR_NOOPERHOST, ERR_NOPRIVILEGES
 
 
@@ -102,6 +103,19 @@ class Commands(BaseCommands):
             args = ['"%s"' % arg for arg in args]
 
         os.execv(sys.executable, args)
+
+    def kill(self, sock, source, target, reason=None):
+        user = User.objects.filter(sock=sock).first()
+        if not user.oper:
+            return ERR_NOPRIVILEGES()
+
+        nick = User.objects.filter(nick=target).first()
+        if nick is None:
+            return ERR_NOSUCHNICK(target)
+
+        reason = u"Killed: {0}".format(reason) if reason else u"Killed"
+
+        self.fire(response.create("quit", nick.sock, nick.source, reason))
 
 
 class Admin(BasePlugin):
