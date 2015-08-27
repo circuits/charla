@@ -169,3 +169,7 @@ def RPL_LISTEND():
 
 def ERR_USERSDONTMATCH():
     return _M(u("502"), u("Cannot change mode for other users"))
+
+
+def ERR_NOTREGISTERED():
+    return _M(u"451", "You have not registered")

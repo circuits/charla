@@ -15,7 +15,7 @@ from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
 
 from ..models import User
 from ..plugin import BasePlugin
-from ..replies import ERR_NEEDMOREPARAMS
+from ..replies import ERR_NEEDMOREPARAMS, ERR_NOTREGISTERED
 
 
 class Processor(BasePlugin):
@@ -126,6 +126,11 @@ class Processor(BasePlugin):
                     )
         elif isinstance(event, response):
             sock = args[0]
+            user = User.objects.filter(sock=sock).first()
+
+            if user and not user.registered and event.name not in ("nick", "pass", "user",):
+                return self.fire(reply(sock, ERR_NOTREGISTERED()))
+
             if event.name not in self.command:
                 event.stop()
                 return self.fire(reply(sock, ERR_UNKNOWNCOMMAND(event.name)))
