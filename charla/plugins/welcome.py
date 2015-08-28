@@ -2,14 +2,13 @@ from itertools import chain
 
 
 from circuits import Event
-from circuits.protocols.irc import reply
-from circuits.protocols.irc import response
+from circuits.protocols.irc import reply, response
+from circuits.protocols.irc.replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_MYINFO, RPL_ISUPPORT
 
 
 from .mode import channel_modes, user_modes
 
 from ..plugin import BasePlugin
-from ..replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_MYINFO, RPL_ISUPPORT
 
 
 class supports(Event):

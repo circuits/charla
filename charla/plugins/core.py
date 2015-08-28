@@ -4,13 +4,13 @@ from operator import attrgetter
 
 
 from circuits.protocols.irc import joinprefix, Message
+from circuits.protocols.irc.replies import ERR_ERRONEUSNICKNAME, ERR_NICKNAMEINUSE
 
 
 from ..events import signon
 from ..plugin import BasePlugin
 from ..models import User, UserInfo
 from ..commands import BaseCommands
-from ..replies import ERR_ERRONEUSNICKNAME, ERR_NICKNAMEINUSE
 
 
 VALID_NICK_REGEX = re.compile(r"^[][\`_^{|}A-Za-z][][\`_^{|}A-Za-z0-9-]*$")
@@ -18,7 +18,7 @@ VALID_NICK_REGEX = re.compile(r"^[][\`_^{|}A-Za-z][][\`_^{|}A-Za-z0-9-]*$")
 
 class Commands(BaseCommands):
 
-    def quit(self, sock, source, reason=u"Leaving"):
+    def quit(self, sock, source, reason=u"Leaving", **kwargs):
         user = User.objects.filter(sock=sock).first()
 
         for channel in user.channels:
@@ -29,7 +29,8 @@ class Commands(BaseCommands):
 
         users = chain(*map(attrgetter("users"), user.channels))
 
-        self.disconnect(user)
+        if kwargs.get("disconnect", True):
+            self.disconnect(user)
 
         self.notify(users, Message(u"QUIT", reason, prefix=user.prefix), user)
 

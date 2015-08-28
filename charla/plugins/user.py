@@ -1,11 +1,16 @@
+from six import u
+
+
+from circuits.protocols.irc.replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
+from circuits.protocols.irc.replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
+from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD, RPL_WHOISOPERATOR
+from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
+from circuits.protocols.irc.replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
+
+
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
-from ..replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
-from ..replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD, RPL_WHOISOPERATOR
-from ..replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
-from ..replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
 
 
 class Commands(BaseCommands):
@@ -84,17 +89,40 @@ class Commands(BaseCommands):
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
 
-            return [
-                RPL_WHOREPLY(user, mask, self.parent.server.host)
-                for user in channel.users
-            ] + [RPL_ENDOFWHO(mask)]
+            replies = []
+            for user in channel.users:
+                userinfo = user.userinfo
+
+                status = u("G") if user.away else u("H")
+                status += (u("*") if user.oper else u(""))
+                status += (u("@") if user in channel.operators else u(""))
+                status += (u("+") if user in channel.voiced else u(""))
+
+                replies.append(
+                    RPL_WHOREPLY(
+                        channel.name, userinfo.user, userinfo.host,
+                        self.parent.server.host, user.nick, status,
+                        0, userinfo.name or ""
+                    )
+                )
+            replies.append(RPL_ENDOFWHO(mask))
+            return replies
         else:
             user = models.User.objects.filter(nick=mask).first()
             if user is None:
                 return ERR_NOSUCHNICK(mask)
 
+            userinfo = user.userinfo
+
+            status = u("G") if user.away else u("H")
+            status += (u("*") if user.oper else u(""))
+
             return (
-                RPL_WHOREPLY(user, mask, self.parent.server.host),
+                RPL_WHOREPLY(
+                    mask, userinfo.user, userinfo.host,
+                    self.parent.server.host, user.nick, status,
+                    0, userinfo.naem
+                ),
                 RPL_ENDOFWHO(mask)
             )
 

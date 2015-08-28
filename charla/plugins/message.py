@@ -7,12 +7,12 @@ from circuits.protocols.irc import joinprefix, reply
 from circuits.protocols.irc import Message as _Message
 
 from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
+from circuits.protocols.irc.replies import ERR_CANNOTSENDTOCHAN
 
 
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
-from ..replies import ERR_CANNOTSENDTOCHAN
 
 
 class Commands(BaseCommands):

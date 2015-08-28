@@ -3,16 +3,17 @@ from operator import attrgetter
 
 
 from circuits.protocols.irc import response, Message
+from circuits.protocols.irc.replies import _M
+from circuits.protocols.irc.replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
+from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND, ERR_USERNOTINCHANNEL
+from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 from funcy import imap, flatten
+
 
 from .. import models
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
-from ..replies import _M
-from ..replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
-from ..replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND, ERR_USERNOTINCHANNEL
-from ..replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 
 VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")

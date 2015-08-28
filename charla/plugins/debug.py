@@ -21,7 +21,10 @@ class Debug(BasePlugin):
     def read(self, sock, data):
         user = User.objects.filter(sock=sock).first()
 
-        host, port = user.host, user.port
+        if user is not None:
+            host, port = user.host, user.port
+        else:
+            host, port = "???", "???"
 
         self.logger.info(u"I: [{0:s}:{1:d}] {2:s}".format(host, port, repr(data)))
 

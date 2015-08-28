@@ -1,5 +1,7 @@
+from circuits.protocols.irc.replies import RPL_VERSION
+
+
 from ..plugin import BasePlugin
-from ..replies import RPL_VERSION
 from ..commands import BaseCommands
 
 

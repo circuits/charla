@@ -5,13 +5,14 @@ from operator import attrgetter
 from six import u
 from funcy import take
 
+from circuits.protocols.irc.replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
+from circuits.protocols.irc.replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS, ERR_USERSDONTMATCH
+from circuits.protocols.irc.replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
+
 
 from ..plugin import BasePlugin
 from ..models import Channel, User
 from ..commands import BaseCommands
-from ..replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
-from ..replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS, ERR_USERSDONTMATCH
-from ..replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
 
 
 def process_channel_mode(user, channel, mode, *args, **kwargs):
