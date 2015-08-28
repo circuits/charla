@@ -4,7 +4,7 @@ from ..commands import BaseCommands
 
 class Commands(BaseCommands):
 
-    def cap(self, sock, source):
+    def cap(self, sock, source, *args):
         pass
 
 
