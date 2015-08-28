@@ -1,6 +1,7 @@
 """Data Models"""
 
 
+from time import time
 from operator import attrgetter
 from socket import socket, error as SocketError
 
@@ -114,9 +115,12 @@ class Channel(Model):
     name = Attribute(required=True, unique=True)
     users = ListField("User")
     modes = Attribute(default="")
-    topic = Attribute(default=None)
     operators = ListField("User")
     voiced = ListField("User")
+
+    _topic = Attribute(default=None)
+    _topic_setter = Attribute(default=None)
+    _topic_timestamp = IntegerField(default=None)
 
     def __repr__(self):
         attrs = self.attributes_dict.copy()
@@ -126,6 +130,17 @@ class Channel(Model):
             return "<%s %s>" % (self.key(), attrs)
 
         return "<%s %s>" % (self.__class__.__name__, attrs)
+
+    @property
+    def topic(self):
+        return self._topic, self._topic_setter, self._topic_timestamp
+
+    @topic.setter
+    def topic(self, (topic, setter)):
+        self._topic = topic
+        self._topic_setter = setter
+        self._topic_timestamp = int(time())
+        self.save()
 
     @property
     def type(self):

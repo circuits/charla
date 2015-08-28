@@ -3,10 +3,11 @@ from operator import attrgetter
 
 
 from circuits.protocols.irc import response, Message
-from circuits.protocols.irc.replies import _M
+from circuits.protocols.irc.replies import _M, RPL_TOPICWHO
+from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND
+from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
+from circuits.protocols.irc.replies import ERR_TOOMANYCHANNELS, ERR_USERNOTINCHANNEL
 from circuits.protocols.irc.replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
-from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND, ERR_USERNOTINCHANNEL
-from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL, ERR_TOOMANYCHANNELS
 
 from funcy import imap, flatten
 
@@ -68,12 +69,12 @@ class Commands(BaseCommands):
         channel.users.append(user)
         channel.save()
 
-        self.fire(response.create("topic", sock, source, channel.name), "server")
+        self.fire(response.create("topic", sock, source, channel.name, joined=True), "server")
         self.fire(response.create("names", sock, source, channel.name), "server")
 
         return replies
 
-    def join(self, sock, source, names):
+    def join(self, sock, source, names, keys=None):
         return flatten(self._join(sock, source, name) for name in names.split(u","))
 
     def part(self, sock, source, name, reason=u"Leaving"):
@@ -116,24 +117,30 @@ class Commands(BaseCommands):
             RPL_ENDOFNAMES(name),
         ]
 
-    def topic(self, sock, source, name, topic=None):
+    def topic(self, sock, source, name, topic=None, **kwargs):
         user = models.User.objects.filter(sock=sock).first()
 
         channel = models.Channel.objects.filter(name=name).first()
         if channel is None:
             return ERR_NOSUCHCHANNEL(name)
 
-        if topic is None and not channel.topic:
+        _topic, _topic_setter, _topic_timestamp = channel.topic
+
+        if topic is None and not _topic:
+            if kwargs.get("joined", False):
+                return
             return RPL_NOTOPIC(channel.name)
 
         if topic is None:
-            return RPL_TOPIC(channel.name, channel.topic)
+            return (
+                RPL_TOPIC(channel.name, _topic),
+                RPL_TOPICWHO(channel.name, _topic_setter, _topic_timestamp)
+            )
 
         if not user.oper and u"t" in channel.modes and user not in channel.operators:
             return ERR_CHANOPRIVSNEEDED(channel.name)
 
-        channel.topic = topic
-        channel.save()
+        channel.topic = (topic, user.prefix)
 
         self.notify(channel.users[:], TOPIC(channel.name, topic, prefix=user.prefix))
 
