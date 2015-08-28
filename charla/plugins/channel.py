@@ -144,7 +144,7 @@ class Commands(BaseCommands):
             nvisible = len([x for x in channel.users if x.visible])
             replies.append(RPL_LIST(channel.name, nvisible, channel.topic))
 
-        replies.append(RPL_LISTEND)
+        replies.append(RPL_LISTEND())
 
         return replies
 
