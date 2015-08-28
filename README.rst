@@ -1,5 +1,5 @@
 .. _Python: http://python.org/
-.. _circuits: http://circuitsframework.org/
+.. _circuits: http://circuitsframework.com/
 .. _Docker: https://www.docker.com/
 .. _Docker Compose: https://github.com/docker/compose
 
