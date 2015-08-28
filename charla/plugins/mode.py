@@ -116,7 +116,7 @@ def process_user_mode(user, mode, op=None):
 
     user.save()
 
-    return MODE(user.nick, u("{0}{1})").format(op, mode), prefix=user.nick)
+    return MODE(user.nick, u("{0}{1}").format(op, mode), prefix=user.nick)
 
 
 user_modes = {
