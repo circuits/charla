@@ -20,8 +20,8 @@ from ..plugin import BasePlugin
 
 
 DEFAULTS = (
-    "admin", "autojoin", "core", "channel", "checkhost", "debug",
-    "hello", "message", "mode", "user", "ping", "processor", "welcome", "version",
+    "admin", "autojoin", "cap", "core", "channel", "checkhost", "debug",
+    "message", "mode", "user", "ping", "processor", "welcome", "version",
 )
 
 

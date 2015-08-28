@@ -129,12 +129,12 @@ class Processor(BasePlugin):
             sock = args[0]
             user = User.objects.filter(sock=sock).first()
 
+            if user and not user.registered and event.name not in ("nick", "pass", "user",):
+                return self.fire(reply(sock, ERR_NOTREGISTERED()))
+
             if event.name not in self.command:
                 event.stop()
                 return self.fire(reply(sock, ERR_UNKNOWNCOMMAND(event.name)))
-
-            if user and not user.registered and event.name not in ("nick", "pass", "user",):
-                return self.fire(reply(sock, ERR_NOTREGISTERED()))
 
             component = self.command[event.name]
             handlers = (x for x in type(component).handlers() if event.name in x.names)
