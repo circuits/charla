@@ -1,7 +1,7 @@
 charla
 ======
 
-charla is [Spanish for chat](http://www.spanishcentral.com/translate/charla) and is an IRC Server and Daemon written in [Python](http://python.org/) using the [circuits](http://circuitsframework.org/) Application Framework.
+charla is [Spanish for chat](http://www.spanishcentral.com/translate/charla) and is an IRC Server and Daemon written in [Python](http://python.org/) using the [circuits](http://circuitsframework.com/) Application Framework.
 
 Installation and Usage
 ----------------------
