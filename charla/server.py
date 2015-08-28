@@ -104,7 +104,7 @@ class Server(Component):
         nick = user.nick
         user, host = user.userinfo.user, user.userinfo.host
 
-        quit = response.create("quit", sock, (nick, user, host), "Leavling")
+        quit = response.create("quit", sock, (nick, user, host), "Leaving")
         quit.complete = True
         quit.complete_channels = ("server",)
 
