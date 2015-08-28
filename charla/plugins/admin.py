@@ -3,10 +3,12 @@ import sys
 from fnmatch import fnmatch
 
 
+from circuits import Timer
 from circuits.net.events import close
 from circuits.protocols.irc import reply, response
 from circuits.protocols.irc.replies import Message, ERR_NOSUCHNICK, ERROR
-from circuits.protocols.irc.replies import ERR_PASSWDMISMATCH, RPL_YOUREOPER, ERR_NOOPERHOST, ERR_NOPRIVILEGES
+from circuits.protocols.irc.replies import ERR_NOOPERHOST, ERR_NOPRIVILEGES
+from circuits.protocols.irc.replies import ERR_PASSWDMISMATCH, RPL_YOUREOPER
 
 
 from ..models import User
@@ -116,8 +118,8 @@ class Commands(BaseCommands):
         reason = u"Killed: {0}".format(reason) if reason else u"Killed"
 
         self.fire(response.create("quit", nick.sock, nick.source, reason, disconnect=False))
-        self.fire(reply(nick.sock, ERROR(reason)))
-        self.fire(close(nick.sock))
+        self.fire(reply(nick.sock, ERROR(reason)), "server")
+        Timer(1, close(nick.sock), "server").register(self)
 
 
 class Admin(BasePlugin):
