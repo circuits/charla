@@ -50,7 +50,8 @@ class Commands(BaseCommands):
 
         type = name[0]
         nchannels = len([x for x in user.channels if channel.type == type])
-        if nchannels >= self.parent.chanlimit[type]:
+        chanlimit = self.parent.chanlimit.get(type, None)
+        if chanlimit and nchannels >= chanlimit:
             return ERR_TOOMANYCHANNELS(name)
 
         self.notify(
@@ -200,6 +201,7 @@ class Channel(BasePlugin):
 
         self.chanlimit = {
             u"#": 120,
+            u"&": 10,
         }
 
         self.features = (
