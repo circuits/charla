@@ -88,7 +88,7 @@ class Commands(BaseCommands):
             return
 
         self.notify(
-            channel.users,
+            channel.users[:],
             Message(u"PART", name, reason, prefix=user.prefix)
         )
 
