@@ -59,18 +59,16 @@ class Commands(BaseCommands):
 
         self.notify(users, Message(u"NICK", nick, prefix=prefix))
 
-    def user(self, sock, source, username, hostname, server, realname):
+    def user(self, sock, source, username, unused1, unused2, realname):
         _user = User.objects.filter(sock=sock).first()
 
         if _user.userinfo is None:
-            userinfo = UserInfo(
-                user=username, host=hostname, name=realname, server=server
-            )
+            userinfo = UserInfo(user=username, name=realname, server=self.parent.server.host)
         else:
             userinfo = _user.userinfo
             userinfo.user = username
             userinfo.name = realname
-            userinfo.server = server
+            userinfo.server = self.parent.server.host
 
         userinfo.save()
 
