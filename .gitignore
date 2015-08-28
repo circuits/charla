@@ -2,6 +2,7 @@
 log
 tmp
 .env
+*.bak
 .eggs
 .cache
 *.py[co]

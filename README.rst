@@ -33,7 +33,7 @@ Using `Docker`_::
     
     $ docker run -d 7000:7000 prologic/charla
 
-From PyPi (*ccoming soon*)::
+From PyPi (*coming soon*)::
     
     $ pip install charla
     $ charla
@@ -44,7 +44,7 @@ Demo
 There is a demo of the development version of charla running at ``daisy.shortcircuit.net.au`` on port ``7000``
 if you're interested in testing charla out or want to help out with testing or get involved in the development!
 
-To connect with your favourite IRC Client::
+To connect with your favorite IRC Client::
     
     /server daisy.shortcircuit.net.au 7000
 
