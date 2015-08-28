@@ -121,7 +121,7 @@ class Commands(BaseCommands):
                 RPL_WHOREPLY(
                     mask, userinfo.user, userinfo.host,
                     self.parent.server.host, user.nick, status,
-                    0, userinfo.naem
+                    0, userinfo.name
                 ),
                 RPL_ENDOFWHO(mask)
             )
