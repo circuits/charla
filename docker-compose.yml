@@ -1,10 +1,9 @@
 redis:
     image: redis
-    ports:
-        - "6379:6379"
 
 charla:
     build: .
+    # image: prologic/charla
     links:
       - redis
     ports:
