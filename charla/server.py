@@ -4,6 +4,7 @@ Main Listening Server Component
 """
 
 
+from time import time
 from datetime import datetime
 from socket import has_ipv6
 from logging import getLogger
@@ -106,6 +107,7 @@ class Server(Component):
     def connect(self, sock, *args):
         host, port = args[:2]
         user = User(sock=sock, host=host, port=port)
+        user.lastmessage = int(time())
         user.save()
 
     def disconnect(self, sock):
