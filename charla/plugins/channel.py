@@ -73,7 +73,10 @@ class Commands(BaseCommands):
         return replies
 
     def join(self, sock, source, names, keys=None):
-        return flatten(self._join(sock, source, name) for name in names.split(u(",")) if name)
+        return filter(
+            None,
+            flatten(self._join(sock, source, name) for name in names.split(u(",")) if name)
+        )
 
     def part(self, sock, source, name, reason=u("Leaving")):
         user = models.User.objects.filter(sock=sock).first()
