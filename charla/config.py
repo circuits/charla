@@ -85,6 +85,13 @@ class Config(reprconf.Config):
         )
 
         add(
+            "--embedded", action="store_true",
+            default=bool(int(environ.get("EMBEDDED", "0"))),
+            dest="embedded",
+            help="Use an embedded database"
+        )
+
+        add(
             "--dbhost", action="store",
             default=environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost"),
             dest="dbhost", metavar="HOST", type=str,

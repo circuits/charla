@@ -1,17 +1,3 @@
-# Module:   main
-# Date:     16th August 2014
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-#
-# Borrowed from sahriswiki (https://sahriswiki.org/)
-# with permission from James Mills, prologic at shortcircuit dot net dot au
-
-
-"""Main Module
-
-Main entry point responsible for configuring and starting the application.
-"""
-
-
 import sys
 import logging
 from logging import getLogger
@@ -44,6 +30,13 @@ def setup_logging(config):
 
 
 def setup_database(config, logger):
+    if config["embedded"]:
+        connection_setup()
+        db = get_client()
+        db.flushall()
+
+        return db
+
     dbhost = config["dbhost"]
     dbport = config["dbport"]
 

@@ -9,7 +9,7 @@ attrdict
 
 # redisco
 # Development version of redisco
--e git+https://github.com/kiddouk/redisco.git#egg=redisco
+-e git+https://github.com/prologic/redisco.git#egg=redisco
 
 # circuits
 # Development version of circuits
