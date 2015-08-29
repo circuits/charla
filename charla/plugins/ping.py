@@ -51,7 +51,7 @@ class Ping(BasePlugin):
             if user.lastping and not user.lastpong and ((now - user.lastping) > self.timeout):
                 delta = now - user.lastping
                 self.fire(response.create("quit", user.sock, user.source, reason.format(delta)))
-                self.fire(reply(user.sock, ERROR(user.host, reason)), "server")
+                self.fire(reply(user.sock, ERROR(user.host, reason.format(delta))), "server")
                 Timer(1, close(user.sock), "server").register(self)
             else:
                 self.fire(write(user.sock, bytes(PING(self.server.host))))
