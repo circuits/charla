@@ -2,6 +2,7 @@ from six import u
 
 from funcy import flatten
 
+from circuits.protocols.irc.replies import RPL_NOWAWAY, RPL_UNAWAY
 from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
 from circuits.protocols.irc.replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
 from circuits.protocols.irc.replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
@@ -121,6 +122,18 @@ class Commands(BaseCommands):
                 ),
                 RPL_ENDOFWHO(mask)
             )
+
+    def away(self, sock, source, message=None):
+        user = models.User.objects.filter(sock=sock).first()
+
+        if message is None:
+            user.away = None
+            user.save()
+            return RPL_UNAWAY()
+
+        user.away = message
+        user.save()
+        return RPL_NOWAWAY()
 
 
 class User(BasePlugin):
