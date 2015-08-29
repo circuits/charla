@@ -117,7 +117,7 @@ class Commands(BaseCommands):
         if nick is None:
             return ERR_NOSUCHNICK(target)
 
-        reason = u("Killed: {0}").format(reason) if reason else nick.nick
+        reason = u("Killed by {0}: {1}").format(user.nick, reason or nick.nick)
 
         self.fire(response.create("quit", nick.sock, nick.source, reason, disconnect=False))
         self.fire(reply(nick.sock, ERROR(reason)), "server")

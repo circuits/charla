@@ -25,6 +25,7 @@ class Commands(BaseCommands):
 
         for channel in user.channels:
             channel.users.remove(user)
+            channel.save()
 
             if not channel.users:
                 channel.delete()
