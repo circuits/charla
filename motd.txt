@@ -1,0 +1,5 @@
+Welcome to the ShortCircuit Network and Charla Development Server!
+
+Project URL: https://github.com/prologic/charla
+
+Enjoy! :)
