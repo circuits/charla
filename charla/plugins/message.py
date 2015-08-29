@@ -1,3 +1,4 @@
+from time import time
 from itertools import chain
 
 
@@ -21,6 +22,8 @@ class Commands(BaseCommands):
 
     def _channel_message(self, event, sock, source, target, message):
         user = User.objects.filter(sock=sock).first()
+        user.lastmessage = int(time())
+        user.save()
 
         channel = Channel.objects.filter(name=target).first()
         if channel is None:
@@ -42,6 +45,8 @@ class Commands(BaseCommands):
 
     def _user_message(self, event, sock, source, target, message):
         user = User.objects.filter(sock=sock).first()
+        user.lastmessage = int(time())
+        user.save()
 
         nick = User.objects.filter(nick=target).first()
         if nick is None:

@@ -9,8 +9,8 @@ from circuits.protocols.irc import response
 from circuits.protocols.irc.replies import RPL_TOPICWHO
 from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
 from circuits.protocols.irc.replies import ERR_TOOMANYCHANNELS, ERR_USERNOTINCHANNEL
+from circuits.protocols.irc.replies import JOIN, TOPIC, KICK, PART, RPL_LIST, RPL_LISTEND
 from circuits.protocols.irc.replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
-from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, KICK, PART, RPL_LIST, RPL_LISTEND
 
 
 from .. import models
@@ -60,7 +60,6 @@ class Commands(BaseCommands):
         user.save()
 
         if not channel.users:
-            replies.append(MODE(name, u("+o {0}").format(user.nick), prefix=self.server.host))
             channel.operators.append(user)
             channel.save()
 

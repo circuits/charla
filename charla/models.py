@@ -59,6 +59,7 @@ class User(Model):
     userinfo = ReferenceField("UserInfo")
 
     registered = BooleanField(default=False)
+    lastmessage = IntegerField(default=None)
     signon = DateTimeField(auto_now_add=True)
 
     def __repr__(self):

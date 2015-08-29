@@ -1,13 +1,16 @@
+from time import time
+
+
 from six import u
 
 from funcy import flatten
 
-from circuits.protocols.irc.replies import RPL_NOWAWAY, RPL_UNAWAY
-from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
+from circuits.protocols.irc.replies import RPL_NOWAWAY, RPL_UNAWAY, RPL_WHOISIDLE
 from circuits.protocols.irc.replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
 from circuits.protocols.irc.replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
 from circuits.protocols.irc.replies import RPL_WHOISOPERATOR, RPL_ENDOFWHO, RPL_ENDOFWHOIS
 from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY
+from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD, RPL_AWAY
 from circuits.protocols.irc.replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER
 
 
@@ -73,9 +76,16 @@ class Commands(BaseCommands):
         replies.append(RPL_WHOISCHANNELS(user.nick, channels))
         replies.append(RPL_WHOISSERVER(user.nick, server.host, server.info))
 
+        if user.away:
+            replies.append(RPL_AWAY(user.nick, user.away))
+
         if user.oper:
             replies.append(RPL_WHOISOPERATOR(user.nick))
 
+        idle = int(time() - (user.lastmessage or time()))
+        sigon = int(user.signon.strftime("%s"))
+
+        replies.append(RPL_WHOISIDLE(user.nick, idle, sigon))
         replies.append(RPL_ENDOFWHOIS(user.nick))
 
         return replies
