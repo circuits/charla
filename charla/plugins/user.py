@@ -1,5 +1,7 @@
 from six import u
 
+from funcy import flatten
+
 from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
 from circuits.protocols.irc.replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
 from circuits.protocols.irc.replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
@@ -31,18 +33,14 @@ class Commands(BaseCommands):
         ]
 
     def motd(self, sock, source):
-        if not self.server.motd.exists():
-            yield ERR_NOMOTD()
-            return
+        if not self.server.motd:
+            return ERR_NOMOTD()
 
-        yield RPL_MOTDSTART(self.server.host)
-
-        with self.server.motd.open("rb") as f:
-            for line in f:
-                line = line.decode(self.parent.server.enconding).strip()
-                yield RPL_MOTD(line)
-
-        yield RPL_ENDOFMOTD()
+        return flatten((
+            RPL_MOTDSTART(self.server.host),
+            map(RPL_MOTD, self.server.motd),
+            RPL_ENDOFMOTD()
+        ))
 
     def whois(self, sock, source, *args):
         if not args:

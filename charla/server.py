@@ -23,6 +23,15 @@ from .models import User
 from . import __name__, __url__, __version__
 
 
+def read_motd(filename, encoding="utf-8"):
+    try:
+        with Path("motd.txt").resolve().open("rb") as f:
+            for line in f:
+                yield line.decode(encoding).strip()
+    except IOError:
+        return
+
+
 class setup(Event):
     """setup Event"""
 
@@ -36,8 +45,6 @@ class Server(Component):
     host = u"daisy.shortcircuit.net.au"
     created = datetime.utcnow()
 
-    motd = Path("motd.txt")
-
     url = unicode(__url__)
     name = unicode(__name__)
     version = unicode(__version__)
@@ -49,6 +56,9 @@ class Server(Component):
     def init(self, config, db):
         self.config = config
         self.db = db
+
+        self.encoding = "utf-8"
+        self.motd = list(read_motd(self.encoding))
 
         self.logger = getLogger(__name__)
 
