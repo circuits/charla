@@ -59,6 +59,9 @@ class User(Model):
     userinfo = ReferenceField("UserInfo")
 
     registered = BooleanField(default=False)
+
+    lastpong = IntegerField(default=None)
+    lastping = IntegerField(default=None)
     lastmessage = IntegerField(default=None)
     signon = DateTimeField(auto_now_add=True)
 

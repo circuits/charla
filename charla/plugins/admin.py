@@ -120,7 +120,7 @@ class Commands(BaseCommands):
         reason = u("Killed by {0}: {1}").format(user.nick, reason or nick.nick)
 
         self.fire(response.create("quit", nick.sock, nick.source, reason, disconnect=False))
-        self.fire(reply(nick.sock, ERROR(reason)), "server")
+        self.fire(reply(nick.sock, ERROR(nick.host, reason)), "server")
         Timer(1, close(nick.sock), "server").register(self)
 
 
