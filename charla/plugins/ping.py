@@ -7,8 +7,8 @@ from ..commands import BaseCommands
 
 class Commands(BaseCommands):
 
-    def ping(self, sock, source, *args):
-        return PONG(*args)
+    def ping(self, sock, source, text):
+        return PONG(self.server.host, text)
 
 
 class Ping(BasePlugin):
