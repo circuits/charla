@@ -10,13 +10,15 @@ from logging import getLogger
 from collections import defaultdict
 
 
-from circuits import Event, Component, Timer
+from six import u
 
-from circuits.net.sockets import TCPServer, TCP6Server
+from pathlib import Path
+
+from circuits import Event, Component, Timer
 
 from circuits.protocols.irc import response, IRC
 
-from pathlib import Path
+from circuits.net.sockets import TCPServer, TCP6Server
 
 
 from .models import User
@@ -40,17 +42,17 @@ class Server(Component):
 
     channel = "server"
 
-    info = u"QLD, Australia"
-    network = u"ShortCircuit"
-    host = u"daisy.shortcircuit.net.au"
+    info = u("QLD, Australia")
+    network = u("ShortCircuit")
+    host = u("daisy.shortcircuit.net.au")
     created = datetime.utcnow()
 
-    url = unicode(__url__)
-    name = unicode(__name__)
-    version = unicode(__version__)
+    url = u(__url__)
+    name = u(__name__)
+    version = u(__version__)
 
     features = (
-        u"NETWORK={0}".format(network),
+        u("NETWORK={0}").format(network),
     )
 
     def init(self, config, db):
@@ -90,14 +92,14 @@ class Server(Component):
                 updateBuffer=self.buffers.__setitem__
             ).register(self)
         except Exception as e:
-            self.logger.error("Cannot start server: {0}".format(e))
-            self.logger.info("Retrying in 5s ...")
+            self.logger.error(u("Cannot start server: {0}").format(e))
+            self.logger.info(u("Retrying in 5s ..."))
             Timer(5, setup()).register(self)
 
     def ready(self, server, bind):
         self.logger.info(
-            u"{0} v{1} ready! Listening on: {1}\n".format(
-                self.name, self.version, u"{0}:{1}".format(*bind)
+            u("{0} v{1} ready! Listening on: {1}\n").format(
+                self.name, self.version, u("{0}:{1}").format(*bind)
             )
         )
 
@@ -114,7 +116,7 @@ class Server(Component):
         nick = user.nick
         user, host = user.userinfo.user, user.userinfo.host
 
-        quit = response.create("quit", sock, (nick, user, host), "Leaving")
+        quit = response.create("quit", sock, (nick, user, host), u("Leaving"))
         quit.complete = True
         quit.complete_channels = ("server",)
 
