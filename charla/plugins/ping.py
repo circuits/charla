@@ -1,3 +1,5 @@
+from six import u
+
 from circuits.protocols.irc import Message
 
 
@@ -7,8 +9,8 @@ from ..commands import BaseCommands
 
 class Commands(BaseCommands):
 
-    def ping(self, sock, source, server):
-        return Message(u"PONG", server)
+    def ping(self, sock, source, *args):
+        return Message(u("PONG"), u(" ").join(args))
 
 
 class Ping(BasePlugin):

@@ -1,9 +1,12 @@
 from itertools import chain
 
 
+from six import u
+
 from circuits import Event
 from circuits.protocols.irc import reply, response
-from circuits.protocols.irc.replies import RPL_WELCOME, RPL_YOURHOST, RPL_CREATED, RPL_MYINFO, RPL_ISUPPORT
+from circuits.protocols.irc.replies import RPL_WELCOME, RPL_YOURHOST
+from circuits.protocols.irc.replies import RPL_CREATED, RPL_MYINFO, RPL_ISUPPORT
 
 
 from .mode import channel_modes, user_modes
@@ -18,10 +21,10 @@ class supports(Event):
 class Welcome(BasePlugin):
 
     def signon(self, sock, source):
-        version = u"{0}-{1}".format(self.server.name, self.server.version)
+        version = u("{0}-{1}").format(self.server.name, self.server.version)
 
-        umodes = u"".join(user_modes.keys())
-        chmodes = u"".join(channel_modes.keys())
+        umodes = u("").join(user_modes.keys())
+        chmodes = u("").join(channel_modes.keys())
 
         self.fire(reply(sock, RPL_WELCOME(self.server.network)))
         self.fire(reply(sock, RPL_YOURHOST(self.server.host, version)))

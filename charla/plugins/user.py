@@ -1,11 +1,11 @@
 from six import u
 
-
+from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD
 from circuits.protocols.irc.replies import ERR_NONICKNAMEGIVEN, ERR_NOMOTD, RPL_LUSEROP
 from circuits.protocols.irc.replies import RPL_LUSERCLIENT, RPL_LUSERCHANNELS, RPL_LUSERME
-from circuits.protocols.irc.replies import RPL_MOTDSTART, RPL_MOTD, RPL_ENDOFMOTD, RPL_WHOISOPERATOR
-from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY, RPL_ENDOFWHO
-from circuits.protocols.irc.replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER, RPL_ENDOFWHOIS
+from circuits.protocols.irc.replies import RPL_WHOISOPERATOR, RPL_ENDOFWHO, RPL_ENDOFWHOIS
+from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, RPL_WHOREPLY
+from circuits.protocols.irc.replies import RPL_WHOISUSER, RPL_WHOISCHANNELS, RPL_WHOISSERVER
 
 
 from .. import models
@@ -19,7 +19,7 @@ class Commands(BaseCommands):
         users = models.User.objects.all()
         nusers = len(users)
         nchannels = len(models.Channel.objects.all())
-        noperators = len([x for x in users if u"o" in x.modes])
+        noperators = len([x for x in users if u("o") in x.modes])
         nservices = 0
         nservers = 1
 
@@ -38,7 +38,9 @@ class Commands(BaseCommands):
         yield RPL_MOTDSTART(self.server.host)
 
         with self.server.motd.open("rb") as f:
-            yield RPL_MOTD(f.readline().strip())
+            for line in f:
+                line = line.decode(self.parent.server.enconding).strip()
+                yield RPL_MOTD(line)
 
         yield RPL_ENDOFMOTD()
 
@@ -59,16 +61,12 @@ class Commands(BaseCommands):
 
         channels = []
         for channel in user.channels:
-            prefix = ""
+            prefix = u("")
             if user in channel.operators:
-                prefix += "@"
+                prefix += u("@")
             if user in channel.voiced:
-                prefix += "+"
-            channels.append(u"{0}{1}".format(prefix, channel.name))
-
-        # Force :<channels>
-        if len(channels) == 1:
-            channels.append("")
+                prefix += u("+")
+            channels.append(u("{0}{1}").format(prefix, channel.name))
 
         replies = []
 
@@ -84,7 +82,7 @@ class Commands(BaseCommands):
         return replies
 
     def who(self, sock, source, mask):
-        if mask.startswith(u"#"):
+        if mask and mask[0] in (u("&"), u("#"),):
             channel = models.Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
@@ -102,7 +100,7 @@ class Commands(BaseCommands):
                     RPL_WHOREPLY(
                         channel.name, userinfo.user, userinfo.host,
                         self.parent.server.host, user.nick, status,
-                        0, userinfo.name or ""
+                        0, userinfo.name or u("")
                     )
                 )
             replies.append(RPL_ENDOFWHO(mask))

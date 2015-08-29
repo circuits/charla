@@ -7,13 +7,14 @@ from traceback import format_exc
 from inspect import getmembers, isclass
 
 
-from pymills.utils import safe__import__
+from six import u
 
+from cidict import cidict
 
 from circuits.tools import kill
 from circuits import Event, Component
 
-from cidict import cidict
+from pymills.utils import safe__import__
 
 
 from ..plugin import BasePlugin
@@ -57,12 +58,12 @@ class Plugins(Component):
 
     def load(self, name, package=__package__):
         if name in self.plugins:
-            msg = u"Not loading already loaded plugin: {0:s}".format(name)
+            msg = u("Not loading already loaded plugin: {0}").format(name)
             self.logger.warn(msg)
             return msg
 
         try:
-            fqplugin = "{0:s}.{1:s}".format(package, name)
+            fqplugin = "{0}.{1}".format(package, name)
             if fqplugin in sys.modules:
                 reload(sys.modules[fqplugin])
 
@@ -76,16 +77,16 @@ class Plugins(Component):
             for name, Plugin in plugins:
                 instance = Plugin(*self.init_args, **self.init_kwargs)
                 instance.register(self)
-                self.logger.debug(u"Registered Component: {0:s}".format(instance))
+                self.logger.debug(u("Registered Component: {0}").format(instance))
                 if name not in self.plugins:
                     self.plugins[name] = set()
                 self.plugins[name].add(instance)
 
-            msg = u"Loaded plugin: {0:s}".format(name)
+            msg = u("Loaded plugin: {0}").format(name)
             self.logger.info(msg)
             return msg
         except Exception, e:
-            msg = u"Could not load plugin: {0:s} Error: {1:s}".format(name, e)
+            msg = u("Could not load plugin: {0} Error: {1}").format(name, e)
             self.logger.error(msg)
             self.logger.error(format_exc())
             return msg
@@ -95,16 +96,16 @@ class Plugins(Component):
             instances = self.plugins[name]
             for instance in instances:
                 kill(instance)
-                self.logger.debug(u"Unregistered Component: {0:s}".format(instance))
+                self.logger.debug(u("Unregistered Component: {0}").format(instance))
                 if hasattr(instance, "cleanup"):
                     instance.cleanup()
-                    self.logger.debug(u"Cleaned up Component: {0:s}".format(instance))
+                    self.logger.debug(u("Cleaned up Component: {0}").format(instance))
             del self.plugins[name]
 
-            msg = u"Unloaded plugin: {0:s}".format(name)
+            msg = u("Unloaded plugin: {0}").format(name)
             self.logger.info(msg)
             return msg
         else:
-            msg = u"Not unloading unloaded plugin: {0:s}".format(name)
+            msg = u("Plugin {0} is not loaded").format(name)
             self.logger.warn(msg)
             return msg

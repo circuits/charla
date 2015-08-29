@@ -1,6 +1,8 @@
 from socket import getaddrinfo, gethostbyaddr, AF_INET6
 
 
+from six import u
+
 from circuits import handler, task
 from circuits.protocols.irc import reply, Message
 
@@ -28,7 +30,7 @@ class CheckHost(BasePlugin):
         _, sock = e.args
         del self.pending[sock]
 
-        self.fire(reply(sock, Message(u"NOTICE", u"*", u"*** Found your hostname")))
+        self.fire(reply(sock, Message(u("NOTICE"), u("*"), u("*** Found your hostname"))))
 
         user = User.objects.filter(sock=sock).first()
 
@@ -48,7 +50,7 @@ class CheckHost(BasePlugin):
     def connect(self, sock, *args):
         host, port = args[:2]
         self.pending[sock] = True
-        self.fire(reply(sock, Message(u"NOTICE", u"*", u"*** Looking up your hostname...")))
+        self.fire(reply(sock, Message(u("NOTICE"), u("*"), u("*** Looking up your hostname..."))))
 
         e = task(check_host, sock)
         e.complete = True

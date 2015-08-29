@@ -1,6 +1,8 @@
 from itertools import chain
 
 
+from six import u
+
 from circuits import handler
 
 from circuits.protocols.irc import joinprefix, reply
@@ -23,22 +25,22 @@ class Commands(BaseCommands):
 
         prefix = user.prefix or joinprefix(*source)
 
-        if target.startswith(u"#"):
+        if target and target[0] in (u("&"), u("#"),):
             channel = Channel.objects.filter(name=target).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(target)
 
-            if "n" in channel.modes:
+            if u("n") in channel.modes:
                 if not user.oper and user not in channel.users:
                     return ERR_CANNOTSENDTOCHAN(channel.name)
 
-            if "m" in channel.modes:
+            if u("m") in channel.modes:
                 if not user.oper and user not in chain(channel.operators, channel.voiced):
                     return ERR_CANNOTSENDTOCHAN(channel.name)
 
             self.notify(
                 channel.users,
-                _Message(u"PRIVMSG", target, message, prefix=prefix),
+                _Message(u("PRIVMSG"), target, message, prefix=prefix),
                 user
             )
         else:

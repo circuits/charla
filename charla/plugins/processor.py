@@ -2,6 +2,8 @@ from inspect import getargspec
 from types import GeneratorType
 
 
+from six import u
+
 from cidict import cidict
 
 from circuits import handler, Event
@@ -11,7 +13,6 @@ from circuits.net.events import write
 from circuits.protocols.irc import reply, response, Message
 
 from circuits.protocols.irc.replies import ERR_UNKNOWNCOMMAND
-
 from circuits.protocols.irc.replies import ERR_NEEDMOREPARAMS, ERR_NOTREGISTERED
 
 
@@ -83,7 +84,7 @@ class Processor(BasePlugin):
         user = User.objects.filter(sock=sock).first()
 
         if message.add_nick:
-            message.args.insert(0, user.nick or u"")
+            message.args.insert(0, user.nick or u(""))
 
         if message.prefix is None:
             message.prefix = self.server.host
@@ -116,10 +117,7 @@ class Processor(BasePlugin):
                     self.fire(value)
                 else:
                     self.logger.warn(
-                        (
-                            u"Handler for {0:s} returned "
-                            u"unknown type {1:s} ({2:s})"
-                        ).format(
+                        u("Handler for {0:s} returned unknown type {1} ({2})").format(
                             name,
                             value.__class__.__name__,
                             repr(value)

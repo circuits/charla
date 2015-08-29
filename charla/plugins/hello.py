@@ -1,3 +1,5 @@
+from six import u
+
 from circuits.protocols.irc import Message
 
 
@@ -8,7 +10,7 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def hello(self, sock, source):
-        return Message(u"NOTICE", u"*", u"Hello!")
+        return Message(u("NOTICE"), u("*"), u("Hello!"))
 
 
 class Hello(BasePlugin):

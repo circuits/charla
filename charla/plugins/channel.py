@@ -2,14 +2,15 @@ import re
 from operator import attrgetter
 
 
-from circuits.protocols.irc import response, Message
-from circuits.protocols.irc.replies import _M, RPL_TOPICWHO
-from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, RPL_LIST, RPL_LISTEND
+from six import u
+from funcy import imap, flatten
+
+from circuits.protocols.irc import response
+from circuits.protocols.irc.replies import RPL_TOPICWHO
 from circuits.protocols.irc.replies import RPL_NOTOPIC, RPL_TOPIC, ERR_NOSUCHCHANNEL
 from circuits.protocols.irc.replies import ERR_TOOMANYCHANNELS, ERR_USERNOTINCHANNEL
 from circuits.protocols.irc.replies import RPL_NAMEREPLY, RPL_ENDOFNAMES, ERR_CHANOPRIVSNEEDED
-
-from funcy import imap, flatten
+from circuits.protocols.irc.replies import MODE, JOIN, TOPIC, KICK, PART, RPL_LIST, RPL_LISTEND
 
 
 from .. import models
@@ -18,10 +19,6 @@ from ..commands import BaseCommands
 
 
 VALID_CHANNEL_REGEX = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]*$")
-
-
-def KICK(channel, nick, reason=None, prefix=None):
-    return _M(u"KICK", channel, nick, reason or nick, prefix=prefix)
 
 
 class Commands(BaseCommands):
@@ -63,7 +60,7 @@ class Commands(BaseCommands):
         user.save()
 
         if not channel.users:
-            replies.append(MODE(name, u"+o {0}".format(user.nick), prefix=self.server.host))
+            replies.append(MODE(name, u("+o {0}").format(user.nick), prefix=self.server.host))
             channel.operators.append(user)
             channel.save()
 
@@ -76,9 +73,9 @@ class Commands(BaseCommands):
         return replies
 
     def join(self, sock, source, names, keys=None):
-        return flatten(self._join(sock, source, name) for name in names.split(u","))
+        return flatten(self._join(sock, source, name) for name in names.split(u(",")) if name)
 
-    def part(self, sock, source, name, reason=u"Leaving"):
+    def part(self, sock, source, name, reason=u("Leaving")):
         user = models.User.objects.filter(sock=sock).first()
 
         channel = models.Channel.objects.filter(name=name).first()
@@ -89,10 +86,7 @@ class Commands(BaseCommands):
         if user not in channel.users:
             return
 
-        self.notify(
-            channel.users[:],
-            Message(u"PART", name, reason, prefix=user.prefix)
-        )
+        self.notify(channel.users[:], PART(name, reason, prefix=user.prefix))
 
         user.channels.remove(channel)
         user.save()
@@ -138,7 +132,7 @@ class Commands(BaseCommands):
                 RPL_TOPICWHO(channel.name, _topic_setter, _topic_timestamp)
             )
 
-        if not user.oper and u"t" in channel.modes and user not in channel.operators:
+        if not user.oper and u("t") in channel.modes and user not in channel.operators:
             return ERR_CHANOPRIVSNEEDED(channel.name)
 
         channel.topic = (topic, user.prefix)
@@ -173,7 +167,7 @@ class Commands(BaseCommands):
 
         self.notify(
             channel.users[:],
-            Message(u"KICK", channel.name, nick.nick, reason or nick.nick, prefix=user.prefix)
+            KICK(channel.name, nick.nick, reason or nick.nick, prefix=user.prefix)
         )
 
         nick.channels.remove(channel)
@@ -197,20 +191,20 @@ class Channel(BasePlugin):
 
         self.channellen = 50
         self.topiclen = 300
-        self.chantypes = "#&"
+        self.chantypes = u("#&")
 
         self.chanlimit = {
-            u"#": 120,
-            u"&": 10,
+            u("#"): 120,
+            u("&"): 10,
         }
 
         self.features = (
-            u"PREFIX=(ov)@+",
-            u"CHANTYPES={0}".format(self.chantypes),
-            u"TOPICLEN={0}".format(self.topiclen),
-            u"CHANNELLEN={0}".format(self.channellen),
-            u"CHANLIMIT={0}".format(
-                u",".join(u"{0}:{1}".format(k, v) for k, v in self.chanlimit.items())
+            u("PREFIX=(ov)@+"),
+            u("CHANTYPES={0}").format(self.chantypes),
+            u("TOPICLEN={0}").format(self.topiclen),
+            u("CHANNELLEN={0}").format(self.channellen),
+            u("CHANLIMIT={0}").format(
+                u(",").join(u("{0}:{1}").format(k, v) for k, v in self.chanlimit.items())
             ),
         )
 

@@ -5,7 +5,9 @@ from ..commands import BaseCommands
 class Commands(BaseCommands):
 
     def cap(self, sock, source, *args):
-        pass
+        """Not Implemented (yet)"""
+
+        return
 
 
 class Capability(BasePlugin):

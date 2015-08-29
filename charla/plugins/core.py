@@ -3,6 +3,8 @@ from itertools import chain
 from operator import attrgetter
 
 
+from six import u
+
 from circuits.protocols.irc import joinprefix, Message
 from circuits.protocols.irc.replies import ERR_ERRONEUSNICKNAME, ERR_NICKNAMEINUSE
 
@@ -18,7 +20,7 @@ VALID_NICK_REGEX = re.compile(r"^[][\`_^{|}A-Za-z][][\`_^{|}A-Za-z0-9-]*$")
 
 class Commands(BaseCommands):
 
-    def quit(self, sock, source, reason=u"Leaving", **kwargs):
+    def quit(self, sock, source, reason=u("Leaving"), **kwargs):
         user = User.objects.filter(sock=sock).first()
 
         for channel in user.channels:
@@ -32,7 +34,7 @@ class Commands(BaseCommands):
         if kwargs.get("disconnect", True):
             self.disconnect(user)
 
-        self.notify(users, Message(u"QUIT", reason, prefix=user.prefix), user)
+        self.notify(users, Message(u("QUIT"), reason, prefix=user.prefix), user)
 
     def nick(self, sock, source, nick):
         user = User.objects.filter(sock=sock).first()
@@ -57,7 +59,7 @@ class Commands(BaseCommands):
 
         users = chain(*map(attrgetter("users"), user.channels))
 
-        self.notify(users, Message(u"NICK", nick, prefix=prefix))
+        self.notify(users, Message(u("NICK"), nick, prefix=prefix))
 
     def user(self, sock, source, username, unused1, unused2, realname):
         _user = User.objects.filter(sock=sock).first()
@@ -89,7 +91,7 @@ class Core(BasePlugin):
         self.nicklen = 16
 
         self.features = (
-            "NICKLEN={0}".format(self.nicklen),
+            u("NICKLEN={0}").format(self.nicklen),
         )
 
         Commands(*args, **kwargs).register(self)

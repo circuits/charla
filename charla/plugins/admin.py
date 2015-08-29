@@ -3,6 +3,8 @@ import sys
 from fnmatch import fnmatch
 
 
+from six import u
+
 from circuits import Timer
 from circuits.net.events import close
 from circuits.protocols.irc import reply, response
@@ -30,7 +32,7 @@ class Commands(BaseCommands):
             return ERR_NOOPERHOST()
 
         if (name, password) == oline:
-            user.modes += u"o"
+            user.modes += u("o")
             user.save()
             return RPL_YOUREOPER()
 
@@ -42,10 +44,10 @@ class Commands(BaseCommands):
             yield ERR_NOPRIVILEGES()
             return
 
-        name = str(name)  # We store plugin names as str (not unicode)
+        name = str(name)  # We store plugin names as str/bytes/ascii (not unicode)
 
         result = yield self.call(load(name), "plugins")
-        yield Message(u"NOTICE", u"*", result.value)
+        yield Message(u("NOTICE"), u("*"), result.value)
 
     def reload(self, sock, source, name):
         user = User.objects.filter(sock=sock).first()
@@ -57,14 +59,14 @@ class Commands(BaseCommands):
         result = yield self.call(query(name), "plugins")
 
         if result.value is None:
-            yield Message(u"NOTICE", u"*", u"No such plugin: {0}".format(name))
+            yield Message(u("NOTICE"), u("*"), u("No such plugin: {0}").format(name))
             return
 
         result = yield self.call(unload(name), "plugins")
-        yield Message(u"NOTICE", u"*", result.value)
+        yield Message(u("NOTICE"), u("*"), result.value)
 
         result = yield self.call(load(name), "plugins")
-        yield Message(u"NOTICE", u"*", result.value)
+        yield Message(u("NOTICE"), u("*"), result.value)
 
     def unload(self, sock, source, name):
         user = User.objects.filter(sock=sock).first()
@@ -76,11 +78,11 @@ class Commands(BaseCommands):
         result = yield self.call(query(name), "plugins")
 
         if result.value is None:
-            yield Message(u"NOTICE", u"*", u"No such plugin: {0}".format(name))
+            yield Message(u("NOTICE"), u("*"), u("No such plugin: {0}").format(name))
             return
 
         result = yield self.call(unload(name), "plugins")
-        yield Message(u"NOTICE", u"*", result.value)
+        yield Message(u("NOTICE"), u("*"), result.value)
 
     def die(self, sock, source):
         user = User.objects.filter(sock=sock).first()
@@ -98,11 +100,11 @@ class Commands(BaseCommands):
         yield self.call(close(), "server")
 
         args = sys.argv[:]
-        self.parent.logger.info(u"Restarting... Args: {0}".format(args))
+        self.parent.logger.info(u("Restarting... Args: {0}".format(args)))
 
         args.insert(0, sys.executable)
         if sys.platform == 'win32':
-            args = ['"%s"' % arg for arg in args]
+            args = ["\"{0}\"".format(arg) for arg in args]
 
         os.execv(sys.executable, args)
 
@@ -115,7 +117,7 @@ class Commands(BaseCommands):
         if nick is None:
             return ERR_NOSUCHNICK(target)
 
-        reason = u"Killed: {0}".format(reason) if reason else u"Killed"
+        reason = u("Killed: {0}").format(reason) if reason else nick.nick
 
         self.fire(response.create("quit", nick.sock, nick.source, reason, disconnect=False))
         self.fire(reply(nick.sock, ERROR(reason)), "server")
@@ -125,7 +127,7 @@ class Commands(BaseCommands):
 class Admin(BasePlugin):
 
     olines = {
-        u"*!prologic@::ffff:127.0.0.1": (u"prologic", u"test"),
+        u("*!prologic@::ffff:127.0.0.1"): (u("prologic"), u("test")),
     }
 
     def init(self, *args, **kwargs):

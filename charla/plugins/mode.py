@@ -3,11 +3,14 @@ from operator import attrgetter
 
 
 from six import u
+
 from funcy import take
 
-from circuits.protocols.irc.replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL, ERR_NOSUCHNICK
-from circuits.protocols.irc.replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS, ERR_USERSDONTMATCH
-from circuits.protocols.irc.replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE, ERR_USERNOTINCHANNEL
+from circuits.protocols.irc.replies import ERR_USERNOTINCHANNEL
+from circuits.protocols.irc.replies import ERR_NOSUCHNICK, ERR_USERSDONTMATCH
+from circuits.protocols.irc.replies import MODE, RPL_UMODEIS, RPL_CHANNELMODEIS
+from circuits.protocols.irc.replies import ERR_NEEDMOREPARAMS, ERR_NOSUCHCHANNEL
+from circuits.protocols.irc.replies import ERR_CHANOPRIVSNEEDED, ERR_UNKNOWNMODE
 
 
 from ..plugin import BasePlugin
@@ -61,12 +64,18 @@ def process_channel_mode_ov(user, channel, mode, *args, **kwargs):
         collection.append(nick)
         channel.save()
 
-        yield True, MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
+        yield (
+            True,
+            MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
+        )
     elif op == u("-"):
         collection.remove(nick)
         channel.save()
 
-        yield True, MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
+        yield (
+            True,
+            MODE(channel.name, u("{0}{1}").format(op, mode), [nick.nick], prefix=user.prefix)
+        )
 
 
 channel_modes = {
@@ -106,7 +115,7 @@ def process_user_mode(user, mode, op=None):
     if op == u("+"):
         if mode in user.modes:
             return
-        if mode == "o":
+        if mode == u("o"):
             return
         user.modes += mode
     else:
@@ -165,14 +174,14 @@ class Commands(BaseCommands):
         """
 
         if not args:
-            return ERR_NEEDMOREPARAMS(u"MODE")
+            return ERR_NEEDMOREPARAMS(u("MODE"))
 
         user = User.objects.filter(sock=sock).first()
 
         args = iter(args)
         mask = next(args)
 
-        if mask.startswith(u("#")):
+        if mask and mask[0] in (u("&"), u("#"),):
             channel = Channel.objects.filter(name=mask).first()
             if channel is None:
                 return ERR_NOSUCHCHANNEL(mask)
@@ -205,7 +214,7 @@ class Mode(BasePlugin):
         self.chanmodes = u",,,nt"
 
         self.features = (
-            u"CHANMODES={0}".format(self.chanmodes),
+            u("CHANMODES={0}").format(self.chanmodes),
         )
 
         Commands(*args, **kwargs).register(self)
