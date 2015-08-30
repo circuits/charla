@@ -19,7 +19,7 @@ def lookup(host):
     addr = reversename.from_address(str(ip))
 
     try:
-        return str(resolver.query(addr, "PTR")[0])
+        return str(resolver.query(addr, "PTR")[0]).rstrip(".")
     except (resolver.NoAnswer, resolver.NXDOMAIN):
         if ip.iptype() == "IPV4MAP":
             return str(ip.v46map())
