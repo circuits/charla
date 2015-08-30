@@ -1,9 +1,11 @@
-from socket import getaddrinfo, gethostbyaddr, AF_INET6
-
-
 from six import u
 
+from IPy import IP
+
 from circuits import handler, task
+
+from dns import resolver, reversename
+
 from circuits.protocols.irc import reply, Message
 
 
@@ -12,11 +14,20 @@ from ..plugin import BasePlugin
 from ..models import User, UserInfo
 
 
+def lookup(host):
+    ip = IP(host)
+    addr = reversename.from_address(str(ip))
+
+    try:
+        return str(resolver.query(addr, "PTR")[0])
+    except (resolver.NoAnswer, resolver.NXDOMAIN):
+        if ip.iptype() == "IPV4MAP":
+            return str(ip.v46map())
+        return str(ip)
+
+
 def check_host(sock):
-    host = sock.getpeername()[0]
-    if ":" in host:
-        return getaddrinfo(host, None, AF_INET6)[0][-1][0]
-    return gethostbyaddr(host)[0]
+    return lookup(sock.getpeername()[0])
 
 
 class CheckHost(BasePlugin):
@@ -45,7 +56,9 @@ class CheckHost(BasePlugin):
         user.userinfo.save()
 
         if user.registered:
-            return signon(sock, user.source)
+            self.fire(signon(user.sock, user.source))
+        else:
+            self.logger.warn(u("User {0} is not registered!").format(user.nick))
 
     def connect(self, sock, *args):
         host, port = args[:2]

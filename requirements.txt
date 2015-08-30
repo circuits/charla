@@ -1,3 +1,4 @@
+ipy
 redis
 funcy
 cidict
@@ -6,6 +7,7 @@ pymills
 hiredis
 pathlib
 attrdict
+dnspython
 
 # redisco
 # Development version of redisco

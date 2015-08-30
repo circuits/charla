@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import sys
+
+from IPy import IP
+from dns import resolver, reversename
+
+
+def lookup(host):
+    ip = IP(host)
+    addr = reversename.from_address(str(ip))
+
+    try:
+        return str(resolver.query(addr, "PTR")[0])
+    except resolver.NXDOMAIN as e:
+        if ip.iptype() == "IPV4MAP":
+            return str(ip.v46map())
+        return str(ip)
+
+
+def main():
+    print(lookup(sys.argv[1]))
+
+
+if __name__ == "__main__":
+    main()

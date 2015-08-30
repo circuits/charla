@@ -127,7 +127,7 @@ class Commands(BaseCommands):
 class Admin(BasePlugin):
 
     olines = {
-        u("*!prologic@::ffff:127.0.0.1"): (u("prologic"), u("test")),
+        u("*!prologic@127.0.0.1"): (u("prologic"), u("test")),
     }
 
     def init(self, *args, **kwargs):
