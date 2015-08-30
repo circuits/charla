@@ -148,7 +148,8 @@ class Commands(BaseCommands):
 
         for channel in models.Channel.objects.all():
             nvisible = len([x for x in channel.users if x.visible])
-            replies.append(RPL_LIST(channel.name, nvisible, channel.topic))
+            topic, _, _ = channel.topic
+            replies.append(RPL_LIST(channel.name, nvisible, topic))
 
         replies.append(RPL_LISTEND())
 

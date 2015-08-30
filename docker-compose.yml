@@ -7,4 +7,4 @@ charla:
     links:
       - redis
     ports:
-      - "7000:7000"
+      - "6668:7000"
