@@ -137,6 +137,8 @@ class Commands(BaseCommands):
         if not user.oper and u("t") in channel.modes and user not in channel.operators:
             return ERR_CHANOPRIVSNEEDED(channel.name)
 
+        topic = topic[:self.parent.topiclen]
+
         channel.topic = (topic, user.prefix)
 
         self.notify(channel.users[:], TOPIC(channel.name, topic, prefix=user.prefix))
