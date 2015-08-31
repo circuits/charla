@@ -14,6 +14,7 @@ from circuits.protocols.irc.replies import ERR_PASSWDMISMATCH, RPL_YOUREOPER
 
 
 from ..models import User
+from ..events import rehashed
 from ..plugin import BasePlugin
 from ..commands import BaseCommands
 from ..plugins import load, query, unload
@@ -26,7 +27,7 @@ class Commands(BaseCommands):
         if user.oper:
             return
 
-        oline = self.parent.oline(user)
+        oline = self.parent._get_oline(user)
 
         if oline is None:
             return ERR_NOOPERHOST()
@@ -130,21 +131,27 @@ class Commands(BaseCommands):
 
         self.parent.config.reload_config()
 
+        self.fire(rehashed(), "server")
+
         return Message(u("NOTICE"), u("*"), u("Configuration reloaded"))
 
 
 class Admin(BasePlugin):
 
-    olines = {
-        u("*!prologic@127.0.0.1"): (u("prologic"), u("test")),
-    }
-
     def init(self, *args, **kwargs):
         super(Admin, self).init(*args, **kwargs)
 
+        self._load_config()
+
         Commands(*args, **kwargs).register(self)
 
-    def oline(self, user):
+    def _load_config(self):
+        self.olines = self.config.get("admin.olines", {})
+
+    def _get_oline(self, user):
         for k, v in self.olines.items():
             if fnmatch(user.prefix, k):
                 return v
+
+    def rehashed(self):
+        self._load_config()
