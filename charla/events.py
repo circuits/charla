@@ -26,3 +26,7 @@ class terminate(Event):
 
 class signon(Event):
     """signon Event"""
+
+
+class rehashed(Event):
+    """rehashed Event"""
