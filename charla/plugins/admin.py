@@ -123,6 +123,15 @@ class Commands(BaseCommands):
         self.fire(reply(nick.sock, ERROR(nick.host, reason)), "server")
         Timer(1, close(nick.sock), "server").register(self)
 
+    def rehash(self, sock, source):
+        user = User.objects.filter(sock=sock).first()
+        if not user.oper:
+            return ERR_NOPRIVILEGES()
+
+        self.parent.config.reload_config()
+
+        return Message(u("NOTICE"), u("*"), u("Configuration reloaded"))
+
 
 class Admin(BasePlugin):
 
