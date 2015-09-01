@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+
+from six import u
+
+from funcy import first, rest, take
+
+
+def channel_mode_o(args, add=False):
+	pass
+
+
+def channel_mode_s(args, add=False):
+	pass
+
+
+def channel_mode_i(args, add=False):
+	pass
+
+
+def channel_mode_t(args, add=False):
+	pass
+
+
+def channel_mode_n(args, add=False):
+	pass
+
+
+def channel_mode_m(args, add=False):
+	pass
+
+
+def channel_mode_l(args, add=False):
+	pass
+
+
+def channel_mode_b(args, add=False):
+	pass
+
+
+def channel_mode_v(args, add=False):
+	pass
+
+
+def channel_mode_k(args, add=False):
+	pass
+
+
+# mode: (params, func)
+maxmodes = 3
+
+modetable = {
+	u("o"): (1, channel_mode_o),  # give/take channel operator privileges;
+	u("s"): (0, channel_mode_s),  # secret channel flag;
+	u("i"): (0, channel_mode_i),  # invite-only channel flag;
+	u("t"): (0, channel_mode_t),  # topic settable by channel operator only flag;
+	u("n"): (0, channel_mode_n),  # no messages to channel from clients on the outside;
+	u("m"): (0, channel_mode_m),  # moderated channel;
+	u("l"): (1, channel_mode_l),  # set the user limit to channel;
+	u("b"): (1, channel_mode_b),  # set a ban mask to keep users out;
+	u("v"): (1, channel_mode_v),  # give/take the ability to speak on a moderated channel;
+	u("k"): (1, channel_mode_k),  # set a channel key (password).
+}
+
+
+def parse_modes(s):
+	if not s:
+		return
+
+	kwargs = {}
+	modes, params = s.split(" ", 1)
+	params = iter(params.split(" "))
+	while modes:
+		for mode in modes:
+			if mode in u("+-"):
+				kwargs["add"] = (mode == u("+"))
+				continue
+
+			if not mode in modetable:
+				yield "?"
+			else:
+				n, f = modetable[mode]
+				args = take(n, params)
+				yield f, args, kwargs.copy()
+		kwargs = {}
+		modes, params  = first(params), rest(params)
