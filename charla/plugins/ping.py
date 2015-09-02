@@ -37,11 +37,11 @@ class Ping(BasePlugin):
     def init(self, *args, **kwargs):
         super(Ping, self).init(*args, **kwargs)
 
-        self.timeout = 10
+        self.timeout = 300
 
         Commands(*args, **kwargs).register(self)
 
-        Timer(30, poll(), self.channel, persist=True).register(self)
+        Timer(240, poll(), self.channel, persist=True).register(self)
 
     def poll(self):
         now = int(time())
