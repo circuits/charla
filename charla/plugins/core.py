@@ -65,6 +65,9 @@ class Commands(BaseCommands):
     def user(self, sock, source, username, unused1, unused2, realname):
         _user = User.objects.filter(sock=sock).first()
 
+        # XXX: We do not verify ident(s)
+        username = u("~{0}").format(username)
+
         if _user.userinfo is None:
             userinfo = UserInfo(user=username, name=realname, server=self.parent.server.host)
         else:
