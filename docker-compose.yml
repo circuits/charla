@@ -1,5 +1,6 @@
 redis:
     image: redis
+    restart: always
 
 charla:
     build: .
@@ -8,3 +9,4 @@ charla:
       - redis
     ports:
       - "6668:7000"
+    restart: always

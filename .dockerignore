@@ -1,6 +1,3 @@
-.git
-Dockerfile
-.dockerignore
 *~
 log
 tmp
@@ -13,5 +10,7 @@ coverage
 .coverage
 *.egg-info
 docs/build
+Dockerfile
 __pycache__
 */version.py
+.dockerignore
