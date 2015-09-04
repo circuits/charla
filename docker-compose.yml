@@ -8,5 +8,5 @@ charla:
     links:
       - redis
     ports:
-      - "6668:7000"
+      - "7000:6667"
     restart: always
