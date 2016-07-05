@@ -10,6 +10,8 @@ from setuptools import setup, find_packages
 def parse_requirements(filename):
     with open(filename, "r") as f:
         for line in f:
+            if line.startswith("git+http"):
+                continue
             if line and line[:2] not in ("#", "-e"):
                 yield line.strip()
 

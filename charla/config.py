@@ -93,14 +93,14 @@ class Config(reprconf.Config):
 
         add(
             "--dbhost", action="store",
-            default=environ.get("REDIS_PORT_6379_TCP_ADDR", "localhost"),
+            default=environ.get("DBHOST", "localhost"),
             dest="dbhost", metavar="HOST", type=str,
             help="set database host to HOST (Redis)"
         )
 
         add(
             "--dbport", action="store",
-            default=int(environ.get("REDIS_PORT_6379_TCP_PORT", "6379")),
+            default=int(environ.get("DBPORT", "6379")),
             dest="dbport", metavar="PORT", type=int,
             help="set database port to PORT (Redis)"
         )
@@ -114,7 +114,7 @@ class Config(reprconf.Config):
         add(
             "-P", "--port",
             action="store", type=int,
-            default=7000, dest="port",
+            default=6667, dest="port",
             help="Port to listen to"
         )
 

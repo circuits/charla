@@ -1,6 +1,6 @@
 FROM crux/python:onbuild
 
-EXPOSE 7000
+EXPOSE 6667/tcp
 
 ENTRYPOINT ["charla"]
 CMD []
