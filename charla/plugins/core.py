@@ -24,8 +24,9 @@ class Commands(BaseCommands):
         user = User.objects.filter(sock=sock).first()
 
         for channel in user.channels:
-            channel.users.remove(user)
-            channel.save()
+            if user in channel.users:
+                channel.users.remove(user)
+                channel.save()
 
             if not channel.users:
                 channel.delete()
