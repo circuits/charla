@@ -15,7 +15,7 @@ from six import u
 
 from pathlib import Path
 
-from circuits import Event, Component, Timer
+from circuits import handler, Event, Component, Timer
 
 from circuits.protocols.irc import response, IRC
 
@@ -67,7 +67,13 @@ class Server(Component):
 
         self.buffers = defaultdict(bytes)
 
-        self.port = config["port"]
+        port = config["port"]
+        if port[0] == "+":
+            self.secure = True
+            self.port = int(port[1:])
+        else:
+            self.secure = False
+            self.port = int(port)
 
         if has_ipv6:
             self.address = "::"
@@ -84,6 +90,9 @@ class Server(Component):
         try:
             self.transport = self.Transport(
                 self.bind,
+                secure=self.secure,
+                certfile=self.config["sslcert"] if self.secure else None,
+                keyfile=self.config.get("sslkey") if self.secure else None,
                 channel=self.channel
             ).register(self)
 
@@ -116,13 +125,23 @@ class Server(Component):
             return
 
         nick = user.nick
-        user, host = user.userinfo.user, user.userinfo.host
+        if user.userinfo is not None:
+            user, host = user.userinfo.user, user.userinfo.host
+        else:
+            user, host = "~{}".format(nick), "unknown"
 
         quit = response.create("quit", sock, (nick, user, host), u("Leaving"))
         quit.complete = True
         quit.complete_channels = ("server",)
 
         self.fire(quit)
+
+    @handler("read", priority=1.0)
+    def on_read(self, event, sock, data):
+        user = User.objects.filter(sock=sock).first()
+        if user is None:
+            event.stop()
+            return
 
     def supports(self):
         return self.features

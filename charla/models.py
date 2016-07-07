@@ -2,6 +2,7 @@
 
 
 from time import time
+from ssl import SSLSocket
 from operator import attrgetter
 from socket import socket, error as SocketError
 
@@ -20,6 +21,8 @@ class SocketField(Attribute):
     cache = bidict()
 
     def typecast_for_read(self, value):
+        if value is None:
+            return None
         return self.cache.get(int(value), None)
 
     def typecast_for_storage(self, value):
@@ -35,11 +38,13 @@ class SocketField(Attribute):
                 fd = self.cache[:value]
                 self.cache[fd] = value
                 return fd
+            except TypeError:
+                return None
             except KeyError:
                 return None
 
     def value_type(self):
-        return socket
+        return (socket, SSLSocket)
 
     def acceptable_types(self):
         return self.value_type()

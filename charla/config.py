@@ -6,6 +6,8 @@ configuration file override those given via command line options.
 """
 
 
+from __future__ import print_function
+
 from os import environ
 from warnings import warn
 from os.path import exists
@@ -27,6 +29,7 @@ class Config(reprconf.Config):
 
         self.parse_environ()
         self.parse_options()
+        self.validate()
 
     def parse_environ(self):
         """Check the environment variables for options."""
@@ -113,9 +116,23 @@ class Config(reprconf.Config):
 
         add(
             "-P", "--port",
-            action="store", type=int,
-            default=6667, dest="port",
-            help="Port to listen to"
+            action="store", type=str,
+            default="6667", dest="port",
+            help="Port to listen to (+6667 for SSL)"
+        )
+
+        add(
+            "--ssl-cert",
+            action="store", type=str, default=None,
+            metavar="FILE", dest="sslcert",
+            help="Path to SSL Certificate to use"
+        )
+
+        add(
+            "--ssl-key",
+            action="store", type=str, default=None,
+            metavar="FILE", dest="sslkey",
+            help="Path to SSL Key to use"
         )
 
         namespace = parser.parse_args()
@@ -134,6 +151,16 @@ class Config(reprconf.Config):
         for option, value in namespace.__dict__.items():
             if option not in self and value is not None:
                 self[option] = value
+
+    def validate(self):
+        if self["port"][0] == "+" and not self.get("sslcert"):
+            print(
+                "Binding to secure port {} but no SSL Certificate!".format(
+                    self["port"]
+                )
+            )
+            print("Use --ssl-cert=/path/to/cert.crt")
+            raise SystemExit(1)
 
     def reload_config(self):
         filename = self.get("config")

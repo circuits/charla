@@ -44,6 +44,8 @@ class CheckHost(BasePlugin):
         self.fire(reply(sock, Message(u("NOTICE"), u("*"), u("*** Found your hostname"))))
 
         user = User.objects.filter(sock=sock).first()
+        if user is None:
+            return
 
         if user.userinfo is None:
             userinfo = UserInfo()
